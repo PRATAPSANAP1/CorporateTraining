@@ -122,7 +122,7 @@ const Register = () => {
       if (result?.token) {
         localStorage.setItem('token', result.token);
       }
-      toast.success('Account created successfully! 🎉');
+      toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err) {
       const message = err?.message || err || 'Registration failed. Please try again.';
@@ -149,7 +149,7 @@ const Register = () => {
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950">
       {/* Left Panel — Decorative */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#2e1065]" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDJ2LTJoMzR6bTAtMzBWMkgydjJoMzR6TTIgMjBoMzR2Mkgydi0yem0wIDEyaDM0djJIMnYtMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
 
         {/* Floating orbs */}
