@@ -26,12 +26,10 @@ const subcategoryValidation = [
   body('name').trim().notEmpty().withMessage('Subcategory name is required'),
 ];
 
-// Public/Student & Admin Routes
 router.get('/', auth, getCategories);
 router.get('/:id', auth, getCategory);
 router.get('/:categoryId/subcategories', auth, getSubcategories);
 
-// Admin Only Routes
 router.post('/', auth, admin, validate(categoryValidation), createCategory);
 router.put('/:id', auth, admin, updateCategory);
 router.delete('/:id', auth, admin, deleteCategory);
@@ -41,3 +39,4 @@ router.put('/subcategories/:id', auth, admin, updateSubcategory);
 router.delete('/subcategories/:id', auth, admin, deleteSubcategory);
 
 module.exports = router;
+

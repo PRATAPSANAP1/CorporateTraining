@@ -1,12 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Category Schema
- *
- * Represents a top-level category for questions and tests
- * (e.g. Aptitude, Technical, Coding). Each category has a type
- * that classifies it into one of the three pillars.
- */
 const categorySchema = new mongoose.Schema(
   {
     name: {
@@ -43,3 +36,4 @@ const categorySchema = new mongoose.Schema(
 const Category = mongoose.model('Category', categorySchema);
 
 module.exports = Category;
+

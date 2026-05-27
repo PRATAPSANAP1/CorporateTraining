@@ -18,7 +18,6 @@ const ManageCategories = () => {
   const [loading, setLoading] = useState(true);
   const [loadingSubs, setLoadingSubs] = useState(false);
 
-  // Category Modal
   const [catModalOpen, setCatModalOpen] = useState(false);
   const [catEditMode, setCatEditMode] = useState(false);
   const [catId, setCatId] = useState(null);
@@ -27,7 +26,6 @@ const ManageCategories = () => {
   const [catDesc, setCatDesc] = useState('');
   const [catSaving, setCatSaving] = useState(false);
 
-  // Subcategory Modal
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [subEditMode, setSubEditMode] = useState(false);
   const [subId, setSubId] = useState(null);
@@ -35,10 +33,8 @@ const ManageCategories = () => {
   const [subDesc, setSubDesc] = useState('');
   const [subSaving, setSubSaving] = useState(false);
 
-  // Parent filter for subcategories
   const [activeParent, setActiveParent] = useState('');
 
-  // Delete Confirmations
   const [deleteCatOpen, setDeleteCatOpen] = useState(false);
   const [deleteSubOpen, setDeleteSubOpen] = useState(false);
   const [targetId, setTargetId] = useState(null);
@@ -84,7 +80,6 @@ const ManageCategories = () => {
     }
   }, [activeParent]);
 
-  // Category save
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     if (!catName.trim()) {
@@ -147,7 +142,6 @@ const ManageCategories = () => {
     }
   };
 
-  // Subcategory save
   const handleSaveSubcategory = async (e) => {
     e.preventDefault();
     if (!subName.trim()) {
@@ -212,13 +206,10 @@ const ManageCategories = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Category Directory</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Add, modify, or delete parent categories and granular topics for aptitude, technical, and coding pillars.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        
+
         {/* Left Side: Categories grid */}
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
@@ -490,3 +481,4 @@ const ManageCategories = () => {
 };
 
 export default ManageCategories;
+

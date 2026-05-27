@@ -29,7 +29,7 @@ const Select = ({
           className={`w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 appearance-none
             ${error 
               ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500' 
-              : 'border-slate-200 dark:border-slate-700/80 focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500'
+              : 'border-slate-300 dark:border-slate-600 focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500'
             }
             focus:outline-none shadow-sm`}
           {...props}
@@ -57,3 +57,4 @@ const Select = ({
 };
 
 export default Select;
+

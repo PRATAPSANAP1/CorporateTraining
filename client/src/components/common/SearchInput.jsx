@@ -10,12 +10,10 @@ const SearchInput = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState(value);
 
-  // Sync internal state with external value changes
   useEffect(() => {
     setSearchTerm(value);
   }, [value]);
 
-  // Debounce the change callback
   useEffect(() => {
     const handler = setTimeout(() => {
       if (onChange) {
@@ -43,7 +41,7 @@ const SearchInput = ({
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={placeholder}
-        className="w-full py-2.5 pl-11 pr-10 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 shadow-sm"
+        className="w-full py-2.5 pl-11 pr-10 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-600 focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-indigo-500 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 shadow-sm"
       />
       {searchTerm && (
         <button
@@ -59,3 +57,4 @@ const SearchInput = ({
 };
 
 export default SearchInput;
+

@@ -1,17 +1,6 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
-/**
- * ConfirmDialog — A glassmorphism confirmation modal.
- * @param {boolean} isOpen
- * @param {Function} onClose
- * @param {Function} onConfirm
- * @param {string} title
- * @param {string} message
- * @param {string} confirmText
- * @param {string} variant - danger | warning | info
- * @param {boolean} loading
- */
 const ConfirmDialog = ({
   isOpen,
   onClose,
@@ -94,3 +83,4 @@ const ConfirmDialog = ({
 };
 
 export default ConfirmDialog;
+

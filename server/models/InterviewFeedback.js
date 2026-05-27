@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * InterviewFeedback Schema
- *
- * Stores feedback from AI-powered mock interview sessions.
- * Supports both HR and technical interview types. Records
- * the questions asked, the user's answers, per-answer feedback,
- * composite scores, and session duration.
- */
 const interviewFeedbackSchema = new mongoose.Schema(
   {
     user: {
@@ -62,3 +54,4 @@ const interviewFeedbackSchema = new mongoose.Schema(
 const InterviewFeedback = mongoose.model('InterviewFeedback', interviewFeedbackSchema);
 
 module.exports = InterviewFeedback;
+

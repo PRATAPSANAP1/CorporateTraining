@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * CodingProblem Schema
- *
- * Represents a coding problem with full problem statement,
- * examples, test cases (visible and hidden), starter code
- * for multiple languages, constraints, and metadata like
- * difficulty, tags, and companies.
- */
 const codingProblemSchema = new mongoose.Schema(
   {
     title: {
@@ -119,3 +111,4 @@ const codingProblemSchema = new mongoose.Schema(
 const CodingProblem = mongoose.model('CodingProblem', codingProblemSchema);
 
 module.exports = CodingProblem;
+

@@ -19,3 +19,4 @@ router.get('/tests', getTestAnalytics);
 router.get('/categories', getCategoryAnalytics);
 
 module.exports = router;
+

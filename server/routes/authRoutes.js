@@ -14,7 +14,6 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-// Validation chains
 const registerValidation = [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Please enter a valid email address').normalizeEmail(),
@@ -43,7 +42,6 @@ const profileValidation = [
   body('profileImage').optional().trim(),
 ];
 
-// Routes
 router.post('/register', validate(registerValidation), register);
 router.post('/login', authLimiter, validate(loginValidation), login);
 router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
@@ -53,3 +51,4 @@ router.get('/profile', auth, getProfile);
 router.put('/profile', auth, validate(profileValidation), updateProfile);
 
 module.exports = router;
+

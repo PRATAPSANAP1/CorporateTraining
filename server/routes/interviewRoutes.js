@@ -17,3 +17,4 @@ router.post('/end', endInterview);
 router.get('/history', getInterviewHistory);
 
 module.exports = router;
+

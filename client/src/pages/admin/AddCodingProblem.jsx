@@ -17,7 +17,6 @@ const AddCodingProblem = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  // Form Fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [difficulty, setDifficulty] = useState('medium');
@@ -25,13 +24,11 @@ const AddCodingProblem = () => {
   const [constraints, setConstraints] = useState('');
   const [inputFormat, setInputFormat] = useState('');
   const [outputFormat, setOutputFormat] = useState('');
-  
-  // Examples: [{ input: '', output: '', explanation: '' }]
+
   const [examples, setExamples] = useState([{ input: '', output: '', explanation: '' }]);
-  
-  // Test Cases: [{ input: '', expectedOutput: '', isHidden: false }]
+
   const [testCases, setTestCases] = useState([{ input: '', expectedOutput: '', isHidden: false }]);
-  
+
   const [timeLimit, setTimeLimit] = useState(2);
   const [memoryLimit, setMemoryLimit] = useState(256);
   const [points, setPoints] = useState(100);
@@ -39,7 +36,6 @@ const AddCodingProblem = () => {
   const [companies, setCompanies] = useState('');
   const [isActive, setIsActive] = useState(true);
 
-  // Load categories on mount
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -52,7 +48,6 @@ const AddCodingProblem = () => {
     loadCategories();
   }, []);
 
-  // Load existing problem data if editing
   useEffect(() => {
     if (!isEdit) return;
 
@@ -88,7 +83,6 @@ const AddCodingProblem = () => {
     loadProblemData();
   }, [id, isEdit, navigate]);
 
-  // Example handlers
   const handleAddExample = () => {
     setExamples([...examples, { input: '', output: '', explanation: '' }]);
   };
@@ -105,7 +99,6 @@ const AddCodingProblem = () => {
     setExamples(nextEx);
   };
 
-  // Test case handlers
   const handleAddTestCase = () => {
     setTestCases([...testCases, { input: '', expectedOutput: '', isHidden: false }]);
   };
@@ -134,14 +127,12 @@ const AddCodingProblem = () => {
       return;
     }
 
-    // Filter example entries
     const filteredExamples = examples.map(ex => ({
       input: ex.input.trim(),
       output: ex.output.trim(),
       explanation: ex.explanation.trim()
     })).filter(ex => ex.input || ex.output);
 
-    // Filter test case entries
     const filteredTestCases = testCases.map(tc => ({
       input: tc.input.trim(),
       expectedOutput: tc.expectedOutput.trim(),
@@ -203,22 +194,18 @@ const AddCodingProblem = () => {
         </Link>
       </div>
 
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white font-black">
           {isEdit ? 'Modify Coding Challenge' : 'Add Coding Challenge'}
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Define sandbox problem titles, descriptive markdowns, execution time limits, and test case constraints.
-        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        
+
         {/* Basic Panel */}
         <Card hover={false} className="p-6 flex flex-col gap-5">
           <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-50 dark:border-slate-800">Problem Metadata</h3>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <Input
               label="Problem Title"
@@ -264,7 +251,7 @@ const AddCodingProblem = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide a detailed outline of the task, constraints, input criteria..."
-              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
+              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none"
             />
           </div>
 
@@ -297,7 +284,7 @@ const AddCodingProblem = () => {
         {/* Formats and constraints */}
         <Card hover={false} className="p-6 flex flex-col gap-5">
           <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-50 dark:border-slate-800">Formatting & Constraints</h3>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Input format description</label>
@@ -306,7 +293,7 @@ const AddCodingProblem = () => {
                 value={inputFormat}
                 onChange={(e) => setInputFormat(e.target.value)}
                 placeholder="e.g. First line contains integer N, followed by N integers..."
-                className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
+                className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -316,7 +303,7 @@ const AddCodingProblem = () => {
                 value={outputFormat}
                 onChange={(e) => setOutputFormat(e.target.value)}
                 placeholder="e.g. Return the duplicate element value, or -1 if no duplicates exist."
-                className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
+                className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -328,7 +315,7 @@ const AddCodingProblem = () => {
               value={constraints}
               onChange={(e) => setConstraints(e.target.value)}
               placeholder="e.g. 1 <= N <= 10^5\n-10^9 <= Arr[i] <= 10^9"
-              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
+              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none"
             />
           </div>
         </Card>
@@ -369,7 +356,7 @@ const AddCodingProblem = () => {
                       rows={2}
                       value={ex.input}
                       onChange={(e) => handleExampleChange(idx, 'input', e.target.value)}
-                      className="w-full py-1.5 px-3 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 focus:outline-none"
+                      className="w-full py-2 px-3 rounded-xl text-xs bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -378,7 +365,7 @@ const AddCodingProblem = () => {
                       rows={2}
                       value={ex.output}
                       onChange={(e) => handleExampleChange(idx, 'output', e.target.value)}
-                      className="w-full py-1.5 px-3 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 focus:outline-none"
+                      className="w-full py-2 px-3 rounded-xl text-xs bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -444,7 +431,7 @@ const AddCodingProblem = () => {
                       rows={2}
                       value={tc.input}
                       onChange={(e) => handleTestCaseChange(idx, 'input', e.target.value)}
-                      className="w-full py-1.5 px-3 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 focus:outline-none"
+                      className="w-full py-2 px-3 rounded-xl text-xs bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -453,7 +440,7 @@ const AddCodingProblem = () => {
                       rows={2}
                       value={tc.expectedOutput}
                       onChange={(e) => handleTestCaseChange(idx, 'expectedOutput', e.target.value)}
-                      className="w-full py-1.5 px-3 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 focus:outline-none"
+                      className="w-full py-2 px-3 rounded-xl text-xs bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus:border-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -505,3 +492,4 @@ const AddCodingProblem = () => {
 };
 
 export default AddCodingProblem;
+

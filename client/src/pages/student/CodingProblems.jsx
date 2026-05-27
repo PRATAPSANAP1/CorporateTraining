@@ -16,7 +16,6 @@ const CodingProblems = () => {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [stats, setStats] = useState({ total: 0, solved: 0, easy: 0, medium: 0, hard: 0 });
@@ -29,17 +28,16 @@ const CodingProblems = () => {
         if (difficulty) {
           params.difficulty = difficulty;
         }
-        
+
         const res = await codingService.getProblems(params);
         let list = res.data.problems || [];
-        
+
         if (search) {
           list = list.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
         }
 
         setProblems(list);
 
-        // Fetch stats on all problems to populate top header metrics
         const allRes = await codingService.getProblems({ limit: 100 });
         const allProblems = allRes.data.problems || [];
         const solved = allProblems.filter(p => p.isSolved).length;
@@ -79,9 +77,6 @@ const CodingProblems = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Sandbox Library</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Solve algorithmic and data structure problems in your preferred programming language and score leaderboard points.
-        </p>
       </div>
 
       {/* Stats Bar */}
@@ -99,12 +94,12 @@ const CodingProblems = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex flex-col gap-1 p-4 bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl border border-slate-100 dark:border-slate-800/40">
             <span className="text-[10px] font-bold text-slate-400 uppercase">Easy Completed</span>
             <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{stats.easy} Solved</span>
           </div>
-          
+
           <div className="flex flex-col gap-1 p-4 bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl border border-slate-100 dark:border-slate-800/40">
             <span className="text-[10px] font-bold text-slate-400 uppercase">Medium Completed</span>
             <span className="text-lg font-extrabold text-amber-600 dark:text-amber-400">{stats.medium} Solved</span>
@@ -221,3 +216,4 @@ const CodingProblems = () => {
 };
 
 export default CodingProblems;
+

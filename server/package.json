@@ -1,7 +1,7 @@
 {
   "name": "mce-placement-portal-server",
   "version": "1.0.0",
-  "description": "OITSTACK Preparation Portal - Backend API",
+  "description": "OIT_STACK Preparation Portal - Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -27,5 +27,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "react-devtools": "^7.0.1"
   }
 }

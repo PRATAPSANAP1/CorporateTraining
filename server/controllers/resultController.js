@@ -2,11 +2,6 @@ const Result = require('../models/Result');
 const Test = require('../models/Test');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get current student's test results
- * @route   GET /api/results/my
- * @access  Private
- */
 const getMyResults = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -43,11 +38,6 @@ const getMyResults = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single result details
- * @route   GET /api/results/my/:id
- * @access  Private
- */
 const getResultDetail = async (req, res) => {
   try {
     const resultId = req.params.id;
@@ -67,7 +57,6 @@ const getResultDetail = async (req, res) => {
       return errorResponse(res, 404, 'Result not found');
     }
 
-    // Ensure users can only view their own results, unless they are admins
     if (result.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return errorResponse(res, 403, 'Unauthorized access to this result');
     }
@@ -79,11 +68,6 @@ const getResultDetail = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all results (Admin only)
- * @route   GET /api/results/admin/all
- * @access  Private/Admin
- */
 const getAllResults = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -125,11 +109,6 @@ const getAllResults = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get result statistics for a test (Admin only)
- * @route   GET /api/results/admin/stats/:testId
- * @access  Private/Admin
- */
 const getResultStats = async (req, res) => {
   try {
     const { testId } = req.params;
@@ -192,3 +171,4 @@ module.exports = {
   getAllResults,
   getResultStats
 };
+

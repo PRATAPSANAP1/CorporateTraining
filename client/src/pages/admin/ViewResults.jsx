@@ -17,13 +17,11 @@ const ViewResults = () => {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [selectedTest, setSelectedTest] = useState('');
   const [passed, setPassed] = useState('');
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
-  // Detail Modal
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
   const [detailData, setDetailData] = useState(null);
@@ -99,9 +97,6 @@ const ViewResults = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Exam Results Log</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Review all historical student test attempts, mark ratios, pass metrics, and detailed answer papers.
-        </p>
       </div>
 
       {/* Filters Card */}
@@ -286,7 +281,7 @@ const ViewResults = () => {
                       {q.options && q.options.map((opt, optIdx) => {
                         const isSelected = ans.selectedAnswer === optIdx;
                         const isCorrectKey = q.correctAnswer === optIdx;
-                        
+
                         let borderStyle = 'border-slate-100 dark:border-slate-800';
                         if (isSelected) {
                           borderStyle = isCorrect ? 'border-emerald-500 text-emerald-600' : 'border-rose-500 text-rose-600';
@@ -325,3 +320,4 @@ const ViewResults = () => {
 };
 
 export default ViewResults;
+

@@ -69,3 +69,4 @@ const ScoreChart = ({ data = [] }) => {
 };
 
 export default ScoreChart;
+

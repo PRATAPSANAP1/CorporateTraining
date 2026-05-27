@@ -1,14 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-/**
- * User Schema
- *
- * Represents a registered user of the OITSTACK.
- * Supports both 'student' and 'admin' roles. Passwords are
- * automatically hashed before saving. The password field is
- * excluded from queries by default (select: false).
- */
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -46,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     college: {
       type: String,
-      default: 'OITSTACK',
+      default: 'OIT_STACK',
     },
     branch: {
       type: String,
@@ -83,12 +75,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Pre-save hook to hash the password.
- *
- * Only runs when the password field has been modified (or is new).
- * Uses bcryptjs with 10 salt rounds.
- */
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -103,16 +89,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-/**
- * Compare an entered password with the stored hashed password.
- *
- * @param {string} enteredPassword - The plain-text password to compare.
- * @returns {Promise<boolean>} True if the passwords match, false otherwise.
- *
- * @example
- * const user = await User.findById(id).select('+password');
- * const isMatch = await user.matchPassword('myPassword123');
- */
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
@@ -120,3 +96,4 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+

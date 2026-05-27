@@ -18,7 +18,6 @@ const ManageStudents = () => {
   const [search, setSearch] = useState('');
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
-  // Dialog & Modal states
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetStudentId, setTargetStudentId] = useState(null);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -90,9 +89,6 @@ const ManageStudents = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Student Management</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Review registered students, view their detailed analytical stats, and manage accounts.
-        </p>
       </div>
 
       {/* Filter Row */}
@@ -154,7 +150,7 @@ const ManageStudents = () => {
                       {row.year || '--'}
                     </td>
                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">
-                      {row.college || 'OITSTACK'}
+                      {row.college || 'OIT_STACK'}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center gap-2">
@@ -272,7 +268,7 @@ const ManageStudents = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-2 mt-2">
               <Button variant="secondary" onClick={() => setStatsOpen(false)}>
                 Close Window
@@ -290,3 +286,4 @@ const ManageStudents = () => {
 };
 
 export default ManageStudents;
+

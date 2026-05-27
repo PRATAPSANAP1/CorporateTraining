@@ -17,7 +17,6 @@ const TestTaking = () => {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Answers state: { questionId: { selectedAnswer: Number, markedForReview: Boolean, timeTaken: Number } }
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0); // in seconds
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -29,7 +28,6 @@ const TestTaking = () => {
   const startTimeRef = useRef(Date.now());
   const questionStartTimeRef = useRef(Date.now());
 
-  // 1. Fetch questions on mount
   useEffect(() => {
     const fetchTestQuestions = async () => {
       try {
@@ -40,7 +38,6 @@ const TestTaking = () => {
         setQuestions(testData.questions || []);
         setTimeLeft((testData.totalTime || 30) * 60);
 
-        // Load saved state from localStorage if exists
         const savedKey = `test_taking_${id}`;
         const savedState = localStorage.getItem(savedKey);
         if (savedState) {
@@ -48,8 +45,7 @@ const TestTaking = () => {
             const parsed = JSON.parse(savedState);
             setAnswers(parsed.answers || {});
             setCurrentIndex(parsed.currentIndex || 0);
-            
-            // Adjust time left based on elapsed time if they refreshed
+
             const elapsed = Math.round((Date.now() - parsed.timestamp) / 1000);
             const remaining = parsed.timeLeft - elapsed;
             if (remaining > 0) {
@@ -72,7 +68,6 @@ const TestTaking = () => {
     fetchTestQuestions();
   }, [id, navigate]);
 
-  // 2. Prevent page reload/leave confirmation
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       e.preventDefault();
@@ -86,7 +81,6 @@ const TestTaking = () => {
     };
   }, []);
 
-  // 3. Countdown timer logic
   useEffect(() => {
     if (loading || !test) return;
 
@@ -97,15 +91,13 @@ const TestTaking = () => {
           handleAutoSubmit();
           return 0;
         }
-        
-        // Show warnings at 5 mins and 1 min
+
         if (prev === 300) {
           toast.error('Only 5 minutes left!', { duration: 5000 });
         } else if (prev === 60) {
           toast.error('1 minute left! Your test will be auto-submitted shortly.', { duration: 8000 });
         }
 
-        // Save current state periodically to localStorage
         const savedKey = `test_taking_${id}`;
         const stateToSave = {
           answers,
@@ -124,7 +116,6 @@ const TestTaking = () => {
     };
   }, [loading, test, answers, currentIndex, id]);
 
-  // Track time spent per question
   useEffect(() => {
     questionStartTimeRef.current = Date.now();
   }, [currentIndex]);
@@ -133,7 +124,7 @@ const TestTaking = () => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
     const timeSpent = Math.round((Date.now() - questionStartTimeRef.current) / 1000);
-    
+
     setAnswers((prev) => {
       const qAns = prev[currentQ._id] || {};
       return {
@@ -146,7 +137,6 @@ const TestTaking = () => {
     });
   };
 
-  // 4. Submit handlers
   const handleAutoSubmit = async () => {
     toast.error('Time is up! Submitting your answers automatically.');
     await executeSubmission(true);
@@ -157,14 +147,12 @@ const TestTaking = () => {
       setSubmitting(true);
       recordTimeSpentOnCurrent();
 
-      // Format answers for API payload: [{ question: id, selectedAnswer: index, timeTaken: seconds }]
       const payloadAnswers = Object.entries(answers).map(([qId, ans]) => ({
         question: qId,
         selectedAnswer: ans.selectedAnswer,
         timeTaken: ans.timeTaken || 0,
       }));
 
-      // Find any unanswered questions to submit with null answers
       questions.forEach(q => {
         if (!answers[q._id]) {
           payloadAnswers.push({
@@ -183,12 +171,10 @@ const TestTaking = () => {
         autoSubmitted: isAuto,
       });
 
-      // Clear localStorage save
       localStorage.removeItem(`test_taking_${id}`);
-      
+
       toast.success('Test submitted successfully!');
-      
-      // Navigate to results screen
+
       navigate(`/student/tests/${id}/result`, { replace: true });
     } catch (err) {
       console.error('Submission error:', err.message);
@@ -249,7 +235,6 @@ const TestTaking = () => {
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Toggle fullscreen mode
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(err => {
@@ -261,7 +246,6 @@ const TestTaking = () => {
     }
   };
 
-  // Listen to fullscreen changes (e.g. if user presses ESC)
   useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -381,7 +365,7 @@ const TestTaking = () => {
               >
                 Previous
               </Button>
-              
+
               <div className="flex gap-3">
                 <Button
                   variant="ghost"
@@ -423,7 +407,7 @@ const TestTaking = () => {
               <p className="text-[10px] text-slate-400 leading-relaxed mb-4">
                 Use the numbers below to hop directly to any question. The border indicates status.
               </p>
-              
+
               {/* Palette grid */}
               <div className="grid grid-cols-5 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
                 {questions.map((q, idx) => {
@@ -499,3 +483,4 @@ const TestTaking = () => {
 };
 
 export default TestTaking;
+

@@ -22,15 +22,14 @@ const testValidation = [
   body('totalTime').isInt({ min: 1 }).withMessage('Total time in minutes is required'),
 ];
 
-// Student & Admin (Private)
 router.get('/', auth, getTests);
 router.get('/:id', auth, getTest);
 router.post('/:id/start', auth, startTest);
 router.post('/:id/submit', auth, submitTest);
 
-// Admin Only
 router.post('/', auth, admin, validate(testValidation), createTest);
 router.put('/:id', auth, admin, updateTest);
 router.delete('/:id', auth, admin, deleteTest);
 
 module.exports = router;
+

@@ -30,8 +30,7 @@ const CodingEditor = () => {
   const [activeTab, setActiveTab] = useState('description'); // 'description', 'submissions'
   const [language, setLanguage] = useState('python');
   const [code, setCode] = useState('');
-  
-  // Terminal execution states
+
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [terminalOutput, setTerminalOutput] = useState(null); // { results, isSubmit, finalStatus }
@@ -45,11 +44,9 @@ const CodingEditor = () => {
         const prob = res.data;
         setProblem(prob);
 
-        // Fetch history submissions
         const histRes = await codingService.getSubmissions(id);
         setSubmissions(histRes.data);
 
-        // Load starter code or previous work from local storage or database starterCode
         const savedCode = localStorage.getItem(`code_${id}_${language}`);
         if (savedCode) {
           setCode(savedCode);
@@ -67,11 +64,9 @@ const CodingEditor = () => {
     fetchProblemDetail();
   }, [id, navigate]);
 
-  // Sync starter codes when switching language
   const handleLanguageChange = (e) => {
     const nextLang = e.target.value;
-    
-    // Save current code to localStorage
+
     if (code) {
       localStorage.setItem(`code_${id}_${language}`, code);
     }
@@ -89,7 +84,7 @@ const CodingEditor = () => {
     try {
       setRunning(true);
       setTerminalOutput(null);
-      
+
       const res = await codingService.runCode({
         problemId: id,
         language,
@@ -148,7 +143,6 @@ const CodingEditor = () => {
         toast.error(`Wrong Answer or Error: ${submission.status}`);
       }
 
-      // Reload submission history
       const histRes = await codingService.getSubmissions(id);
       setSubmissions(histRes.data);
     } catch (err) {
@@ -179,7 +173,7 @@ const CodingEditor = () => {
 
       {/* Main split dashboard layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        
+
         {/* Left Side: Descriptions & Submissions tabs */}
         <div className="flex flex-col gap-4">
           <Card className="flex flex-col h-[650px] overflow-hidden p-0" hover={false}>
@@ -388,7 +382,7 @@ const CodingEditor = () => {
               <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
                 <Terminal className="w-4 h-4" /> Ready to compile
               </span>
-              
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -433,7 +427,6 @@ const CodingEditor = () => {
               </div>
 
               {terminalOutput.isSubmit ? (
-                // Output for Submission
                 <div className="text-xs space-y-2 mt-2">
                   {terminalOutput.results[0].error ? (
                     <pre className="text-rose-400 font-mono bg-rose-950/20 border border-rose-950/40 p-3 rounded-xl whitespace-pre-wrap">
@@ -449,7 +442,6 @@ const CodingEditor = () => {
                   )}
                 </div>
               ) : (
-                // Output for Run Code on Examples
                 <div className="text-xs space-y-3 mt-2">
                   {terminalOutput.results.map((res, idx) => (
                     <div key={idx} className="border-b border-slate-800 pb-3 last:border-b-0 last:pb-0">
@@ -459,7 +451,7 @@ const CodingEditor = () => {
                           {res.status.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
-                      
+
                       {res.error ? (
                         <pre className="text-rose-400 font-mono bg-rose-950/20 p-2.5 rounded-lg border border-rose-950/30 whitespace-pre-wrap">{res.error}</pre>
                       ) : (
@@ -489,3 +481,4 @@ const CodingEditor = () => {
 };
 
 export default CodingEditor;
+

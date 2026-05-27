@@ -14,11 +14,6 @@ const LANGUAGE_IDS = {
   javascript: 63
 };
 
-/**
- * @desc    Get all coding problems (filtered, paginated)
- * @route   GET /api/coding/problems
- * @access  Private
- */
 const getProblems = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -47,7 +42,6 @@ const getProblems = async (req, res) => {
 
     const total = await CodingProblem.countDocuments(filter);
 
-    // Get current user's submission statuses for these problems
     const solvedMap = {};
     if (req.user && req.user.role !== 'admin') {
       const mySubmissions = await CodingSubmission.find({
@@ -80,11 +74,6 @@ const getProblems = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single coding problem by ID
- * @route   GET /api/coding/problems/:id
- * @access  Private
- */
 const getProblem = async (req, res) => {
   try {
     const problem = await CodingProblem.findById(req.params.id)
@@ -96,7 +85,6 @@ const getProblem = async (req, res) => {
 
     const problemData = problem.toObject();
 
-    // If student, hide the expected outputs of the hidden test cases
     if (req.user.role !== 'admin') {
       problemData.testCases = problemData.testCases.map(tc => {
         if (tc.isHidden) {
@@ -104,7 +92,6 @@ const getProblem = async (req, res) => {
             _id: tc._id,
             input: tc.input,
             isHidden: true
-            // omit expectedOutput
           };
         }
         return tc;
@@ -118,11 +105,6 @@ const getProblem = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create coding problem (Admin only)
- * @route   POST /api/coding/problems
- * @access  Private/Admin
- */
 const createProblem = async (req, res) => {
   try {
     const {
@@ -176,11 +158,6 @@ const createProblem = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update coding problem (Admin only)
- * @route   PUT /api/coding/problems/:id
- * @access  Private/Admin
- */
 const updateProblem = async (req, res) => {
   try {
     const problem = await CodingProblem.findByIdAndUpdate(
@@ -200,11 +177,6 @@ const updateProblem = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete coding problem (Admin only)
- * @route   DELETE /api/coding/problems/:id
- * @access  Private/Admin
- */
 const deleteProblem = async (req, res) => {
   try {
     const problem = await CodingProblem.findByIdAndUpdate(
@@ -224,9 +196,6 @@ const deleteProblem = async (req, res) => {
   }
 };
 
-/**
- * Helper to call Judge0 API
- */
 const executeOnJudge0 = async (sourceCode, languageId, stdin, expectedOutput, timeLimit, memoryLimit) => {
   const url = `${config.judge0ApiUrl}/submissions?base64_encoded=false&wait=true`;
   const headers = {};
@@ -250,11 +219,6 @@ const executeOnJudge0 = async (sourceCode, languageId, stdin, expectedOutput, ti
   return response.data;
 };
 
-/**
- * @desc    Run student code against example test cases (No submission saved)
- * @route   POST /api/coding/run
- * @access  Private
- */
 const runCode = async (req, res) => {
   try {
     const { problemId, language, code } = req.body;
@@ -269,10 +233,8 @@ const runCode = async (req, res) => {
       return errorResponse(res, 400, 'Unsupported language');
     }
 
-    // Get public example cases
     const publicExamples = problem.examples || [];
     if (publicExamples.length === 0) {
-      // Use the first non-hidden testcase if no examples are specified
       const fallbackTc = problem.testCases.find(tc => !tc.isHidden);
       if (fallbackTc) {
         publicExamples.push({
@@ -308,7 +270,7 @@ const runCode = async (req, res) => {
           executionTime = runRes.time || 0;
           memoryUsed = runRes.memory || 0;
           stdout = runRes.stdout || '';
-          
+
           const statusId = runRes.status ? runRes.status.id : 3;
 
           if (statusId === 3) {
@@ -330,12 +292,10 @@ const runCode = async (req, res) => {
           }
         } catch (err) {
           console.error(`Judge0 error on run case ${i}:`, err.message);
-          // Fallback if API fails
           outputStatus = 'accepted'; 
           stdout = tc.output;
         }
       } else {
-        // Mock execution fallback if API key is not configured
         outputStatus = 'accepted';
         stdout = tc.output;
         executionTime = 0.02;
@@ -364,11 +324,6 @@ const runCode = async (req, res) => {
   }
 };
 
-/**
- * @desc    Submit student code (Run against all test cases & save submission)
- * @route   POST /api/coding/submit
- * @access  Private
- */
 const submitCode = async (req, res) => {
   try {
     const { problemId, language, code } = req.body;
@@ -437,7 +392,6 @@ const submitCode = async (req, res) => {
           finalOutput = tc.expectedOutput;
         }
       } else {
-        // Mock evaluator fallback
         isCasePassed = true;
         testCasesPassed++;
         finalOutput = tc.expectedOutput;
@@ -450,7 +404,6 @@ const submitCode = async (req, res) => {
       finalStatus = 'wrong_answer';
     }
 
-    // Save CodingSubmission
     const submission = await CodingSubmission.create({
       user: req.user._id,
       problem: problemId,
@@ -465,7 +418,6 @@ const submitCode = async (req, res) => {
       error: compileError || runError
     });
 
-    // ─── Update User Daily Streak ─────────────────────────────
     const user = await User.findById(req.user._id);
     if (user) {
       const today = new Date().toDateString();
@@ -480,7 +432,7 @@ const submitCode = async (req, res) => {
         if (lastActive) {
           const diffTime = Math.abs(new Date(today) - new Date(lastActive));
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
+
           if (diffDays === 1) {
             currentStreak += 1;
           } else {
@@ -501,7 +453,6 @@ const submitCode = async (req, res) => {
       }
     }
 
-    // ─── Update Leaderboard ──────────────────────────────────
     if (finalStatus === 'accepted') {
       await updateLeaderboard(req.user._id);
     }
@@ -513,11 +464,6 @@ const submitCode = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get submissions history of current student for a problem
- * @route   GET /api/coding/submissions/:problemId
- * @access  Private
- */
 const getMySubmissions = async (req, res) => {
   try {
     const submissions = await CodingSubmission.find({
@@ -542,3 +488,4 @@ module.exports = {
   submitCode,
   getMySubmissions
 };
+

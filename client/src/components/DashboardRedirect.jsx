@@ -3,10 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LoadingSpinner from './common/LoadingSpinner';
 
-/**
- * DashboardRedirect — Inspects the authenticated user's role and routes them
- * to the correct dashboard (/admin/dashboard or /student/dashboard).
- */
 const DashboardRedirect = () => {
   const { isAuthenticated, isLoading, user } = useSelector((state) => state.auth);
 
@@ -30,3 +26,4 @@ const DashboardRedirect = () => {
 };
 
 export default DashboardRedirect;
+

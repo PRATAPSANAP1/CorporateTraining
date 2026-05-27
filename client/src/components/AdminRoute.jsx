@@ -3,9 +3,6 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-/**
- * AdminRoute — Only allows users with role 'admin' to access.
- */
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useSelector((state) => state.auth);
   const location = useLocation();
@@ -30,3 +27,4 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
+

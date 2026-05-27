@@ -5,17 +5,11 @@ const User = require('../models/User');
 const { updateLeaderboard } = require('./leaderboardController');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get tests list (filtered by category, admin/student view)
- * @route   GET /api/tests
- * @access  Private
- */
 const getTests = async (req, res) => {
   try {
     const { category, subcategory, difficulty } = req.query;
     const filter = { isActive: true };
 
-    // Admins see all, students see active only
     if (req.user && req.user.role === 'admin') {
       delete filter.isActive;
     }
@@ -36,11 +30,6 @@ const getTests = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single test by ID
- * @route   GET /api/tests/:id
- * @access  Private
- */
 const getTest = async (req, res) => {
   try {
     const test = await Test.findById(req.params.id)
@@ -51,15 +40,12 @@ const getTest = async (req, res) => {
       return errorResponse(res, 404, 'Test not found');
     }
 
-    // If student, do not return the full populated questions array with correct answers.
-    // Instead return the test metadata.
     if (req.user.role !== 'admin') {
       const studentTestView = test.toObject();
       delete studentTestView.questions; // Strip questions to prevent inspecting answers
       return successResponse(res, 200, 'Test details retrieved successfully', studentTestView);
     }
 
-    // For admin, populate the questions fully
     const adminTest = await Test.findById(req.params.id)
       .populate('category', 'name type')
       .populate('subcategory', 'name')
@@ -72,11 +58,6 @@ const getTest = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create test
- * @route   POST /api/tests
- * @access  Private/Admin
- */
 const createTest = async (req, res) => {
   try {
     const {
@@ -129,11 +110,6 @@ const createTest = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update test
- * @route   PUT /api/tests/:id
- * @access  Private/Admin
- */
 const updateTest = async (req, res) => {
   try {
     const test = await Test.findByIdAndUpdate(
@@ -153,11 +129,6 @@ const updateTest = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete test (soft delete)
- * @route   DELETE /api/tests/:id
- * @access  Private/Admin
- */
 const deleteTest = async (req, res) => {
   try {
     const test = await Test.findByIdAndUpdate(
@@ -177,11 +148,6 @@ const deleteTest = async (req, res) => {
   }
 };
 
-/**
- * @desc    Start test (Student starts, returns questions without answers)
- * @route   POST /api/tests/:id/start
- * @access  Private
- */
 const startTest = async (req, res) => {
   try {
     const test = await Test.findById(req.params.id)
@@ -196,7 +162,6 @@ const startTest = async (req, res) => {
       return errorResponse(res, 404, 'Test not found or inactive');
     }
 
-    // Check if test dates are valid if scheduled
     const now = new Date();
     if (test.startDate && now < test.startDate) {
       return errorResponse(res, 400, 'This test has not started yet');
@@ -207,7 +172,6 @@ const startTest = async (req, res) => {
 
     let testQuestions = [...test.questions];
 
-    // Randomize questions if configured
     if (test.randomizeQuestions) {
       for (let i = testQuestions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -215,7 +179,6 @@ const startTest = async (req, res) => {
       }
     }
 
-    // Return the test metadata and the randomized questions list
     const testData = test.toObject();
     testData.questions = testQuestions;
 
@@ -226,11 +189,6 @@ const startTest = async (req, res) => {
   }
 };
 
-/**
- * @desc    Submit test (Student submits answers, scores calculated)
- * @route   POST /api/tests/:id/submit
- * @access  Private
- */
 const submitTest = async (req, res) => {
   try {
     const testId = req.params.id;
@@ -245,7 +203,6 @@ const submitTest = async (req, res) => {
     let totalMarks = 0;
     const processedAnswers = [];
 
-    // Map user answers for fast lookup
     const answerMap = {};
     if (answers && Array.isArray(answers)) {
       answers.forEach(ans => {
@@ -253,7 +210,6 @@ const submitTest = async (req, res) => {
       });
     }
 
-    // Evaluate each question in the test
     test.questions.forEach(question => {
       totalMarks += question.marks;
 
@@ -271,7 +227,6 @@ const submitTest = async (req, res) => {
             isCorrect = true;
             obtainedMarks += question.marks;
           } else {
-            // Apply negative marking
             if (test.negativeMarking) {
               const penalty = test.negativeMarkValue || question.negativeMark || 0;
               obtainedMarks -= penalty;
@@ -288,13 +243,11 @@ const submitTest = async (req, res) => {
       });
     });
 
-    // Floor obtained marks to 0 so it never goes negative
     if (obtainedMarks < 0) obtainedMarks = 0;
 
     const percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
     const passed = obtainedMarks >= (test.passingMarks || 0);
 
-    // Save result
     const result = await Result.create({
       user: req.user._id,
       test: testId,
@@ -307,7 +260,6 @@ const submitTest = async (req, res) => {
       autoSubmitted: autoSubmitted || false,
     });
 
-    // ─── Update Daily Streak ─────────────────────────────────
     const user = await User.findById(req.user._id);
     if (user) {
       const today = new Date().toDateString();
@@ -322,7 +274,7 @@ const submitTest = async (req, res) => {
         if (lastActive) {
           const diffTime = Math.abs(new Date(today) - new Date(lastActive));
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
+
           if (diffDays === 1) {
             currentStreak += 1;
           } else {
@@ -343,7 +295,6 @@ const submitTest = async (req, res) => {
       }
     }
 
-    // ─── Update Leaderboard ──────────────────────────────────
     await updateLeaderboard(req.user._id);
 
     return successResponse(res, 201, 'Test submitted successfully', result);
@@ -362,3 +313,4 @@ module.exports = {
   startTest,
   submitTest,
 };
+

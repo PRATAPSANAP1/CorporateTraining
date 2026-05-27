@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import {
   LayoutDashboard, Brain, Terminal, Code2, Mic,
   Trophy, ClipboardList, User, LogOut, Menu, X,
-  Moon, Sun, Bell, Settings
+  Moon, Sun, Bell, Settings, Search, BookOpen
 } from 'lucide-react';
+import codingService from '../../services/codingService';
+import testService from '../../services/testService';
 
 const navItems = [
   { label: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
@@ -25,6 +27,59 @@ const StudentLayout = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState({ coding: [], tests: [] });
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ coding: [], tests: [] });
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const codingRes = await codingService.getProblems({ limit: 100 });
+        const codingProblems = codingRes.data.problems || [];
+        const filteredCoding = codingProblems.filter(p =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+        );
+
+        const testsRes = await testService.getTests({ limit: 100 });
+        const allTests = testsRes.data || [];
+        const filteredTests = allTests.filter(t =>
+          t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+
+        setSearchResults({
+          coding: filteredCoding.slice(0, 5),
+          tests: filteredTests.slice(0, 5)
+        });
+      } catch (err) {
+        console.error('Global search error:', err);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const toggleDark = () => {
     document.documentElement.classList.toggle('dark');
@@ -52,14 +107,11 @@ const StudentLayout = () => {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col`}
       >
-        {/* Brand */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <span className="text-white font-bold text-sm">OITSTACK</span>
-            </div>
+            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-9 h-9 object-contain rounded-xl bg-white border border-slate-100 dark:border-slate-800 shadow-sm" />
             <div>
-              <h1 className="font-bold text-slate-900 dark:text-white text-sm">OITSTACK</h1>
+              <h1 className="font-bold text-slate-900 dark:text-white text-sm">OIT_STACK</h1>
               <p className="text-[10px] text-slate-400 font-medium">Student Portal</p>
             </div>
           </div>
@@ -97,7 +149,7 @@ const StudentLayout = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user?.name || 'Student'}</p>
-              <p className="text-xs text-slate-400 truncate">{user?.email || 'student@oitstack.com'}</p>
+              <p className="text-xs text-slate-400 truncate">{user?.email || 'student@oit_stack.com'}</p>
             </div>
             <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Logout">
               <LogOut className="w-4 h-4 text-slate-400" />
@@ -117,9 +169,85 @@ const StudentLayout = () => {
             <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
 
-          <div className="hidden lg:block" />
+          <div className="flex lg:hidden items-center gap-2">
+            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-7 h-7 object-contain rounded-lg bg-white border border-slate-100 dark:border-slate-800 shadow-sm" />
+            <span className="font-bold text-slate-900 dark:text-white text-sm">OIT_STACK</span>
+          </div>
+          <div className="flex-1" />
 
           <div className="flex items-center gap-2">
+            <div ref={searchRef} className="hidden sm:block relative w-64 md:w-80 mr-1.5">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search any problem or test..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchDropdown(true);
+                  }}
+                  onFocus={() => setShowSearchDropdown(true)}
+                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 transition-all placeholder-slate-400"
+                />
+              </div>
+
+              {showSearchDropdown && searchQuery.trim() && (
+                <div className="absolute top-11 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden max-h-80 overflow-y-auto p-2">
+                  {searching ? (
+                    <div className="p-3 text-center text-xs text-slate-400">Searching...</div>
+                  ) : searchResults.coding.length === 0 && searchResults.tests.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-slate-400">No matches found</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {searchResults.coding.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">Coding Problems</h4>
+                          <div className="space-y-0.5">
+                            {searchResults.coding.map(p => (
+                              <button
+                                key={p._id}
+                                onClick={() => {
+                                  navigate(`/student/coding/${p._id}`);
+                                  setShowSearchDropdown(false);
+                                  setSearchQuery('');
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+                              >
+                                <Code2 className="w-3.5 h-3.5 text-emerald-500" />
+                                <span className="truncate">{p.title}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {searchResults.tests.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-400 uppercase px-2 mb-1">MCQ Tests</h4>
+                          <div className="space-y-0.5">
+                            {searchResults.tests.map(t => (
+                              <button
+                                key={t._id}
+                                onClick={() => {
+                                  navigate(`/student/tests/${t._id}`);
+                                  setShowSearchDropdown(false);
+                                  setSearchQuery('');
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+                              >
+                                <BookOpen className="w-3.5 h-3.5 text-blue-500" />
+                                <span className="truncate">{t.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <button onClick={toggleDark} className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
               {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-500" />}
             </button>
@@ -143,3 +271,4 @@ const StudentLayout = () => {
 };
 
 export default StudentLayout;
+

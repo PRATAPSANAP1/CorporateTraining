@@ -18,17 +18,15 @@ const TestResult = () => {
     const fetchLatestResult = async () => {
       try {
         setLoading(true);
-        // Find the latest result matching this testId for the logged-in student
         const historyRes = await resultService.getMyResults({ testId: id, limit: 1 });
         const resultsList = historyRes.data.results || [];
-        
+
         if (resultsList.length === 0) {
           toast.error('No results found for this test session.');
           navigate('/student/tests');
           return;
         }
 
-        // Fetch detailed results (with question text, correct answers, etc.)
         const detailedRes = await resultService.getResultDetail(resultsList[0]._id);
         setResult(detailedRes.data);
       } catch (err) {
@@ -48,7 +46,6 @@ const TestResult = () => {
   const percentage = Math.round(result.percentage || 0);
   const passed = result.passed;
 
-  // Calculate statistics
   const totalQ = testInfo.totalQuestions || result.answers.length;
   let correctCount = 0;
   let wrongCount = 0;
@@ -142,7 +139,7 @@ const TestResult = () => {
             <p className="text-lg font-black mt-1">{skippedCount}</p>
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800/80 justify-between text-slate-500 text-sm">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-indigo-500" />
@@ -150,7 +147,7 @@ const TestResult = () => {
             <span>•</span>
             <span>Exam Limit: <strong>{testInfo.totalTime} Mins</strong></span>
           </div>
-          
+
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -223,7 +220,7 @@ const TestResult = () => {
                     {q.options && q.options.map((opt, optIdx) => {
                       const isSelected = ans.selectedAnswer === optIdx;
                       const isCorrectAnswer = q.correctAnswer === optIdx;
-                      
+
                       let optionBorder = 'border-slate-100 dark:border-slate-800 bg-slate-50/20';
                       if (isSelected) {
                         optionBorder = isCorrect ? 'border-emerald-500 bg-emerald-50/5 dark:bg-emerald-500/5' : 'border-rose-500 bg-rose-50/5 dark:bg-rose-500/5';
@@ -268,3 +265,4 @@ const TestResult = () => {
 };
 
 export default TestResult;
+

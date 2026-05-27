@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Test Schema
- *
- * Represents a timed test/quiz composed of multiple questions.
- * Linked to a Category and optionally a Subcategory. Supports
- * features like randomization, negative marking, scheduling
- * (start/end dates), and configurable difficulty.
- */
 const testSchema = new mongoose.Schema(
   {
     name: {
@@ -92,3 +84,4 @@ const testSchema = new mongoose.Schema(
 const Test = mongoose.model('Test', testSchema);
 
 module.exports = Test;
+

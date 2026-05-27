@@ -52,16 +52,11 @@ const AdminLayout = () => {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col`}
       >
-        {/* Brand */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <span className="text-white font-bold text-sm">OITSTACK</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-900 dark:text-white text-sm">OITSTACK</h1>
-              <p className="text-[10px] text-gray-400 font-medium">Admin Portal</p>
-            </div>
+        <div className="h-16 flex items-center gap-3 px-6 border-b border-gray-100 dark:border-slate-800">
+          <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-8 h-8 object-contain rounded-lg bg-white border border-slate-100 dark:border-slate-800 shadow-sm" />
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-gray-900 dark:text-white text-sm truncate">OIT_STACK</h1>
+            <p className="text-[10px] text-gray-400 font-medium truncate">Admin Portal</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
             <X className="w-5 h-5 text-gray-400" />
@@ -97,7 +92,7 @@ const AdminLayout = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user?.name || 'Admin'}</p>
-              <p className="text-xs text-gray-400 truncate">{user?.email || 'admin@oitstack.com'}</p>
+              <p className="text-xs text-gray-400 truncate">{user?.email || 'admin@oit_stack.com'}</p>
             </div>
             <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors" title="Logout">
               <LogOut className="w-4 h-4 text-gray-400" />
@@ -117,6 +112,10 @@ const AdminLayout = () => {
             <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
 
+          <div className="flex lg:hidden items-center gap-2">
+            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-7 h-7 object-contain rounded-lg bg-white border border-slate-100 dark:border-slate-800 shadow-sm" />
+            <span className="font-bold text-gray-900 dark:text-white text-sm">OIT_STACK</span>
+          </div>
           <div className="hidden lg:block" />
 
           <div className="flex items-center gap-2">
@@ -143,3 +142,4 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
+

@@ -42,8 +42,7 @@ const CustomTooltip = ({ active, payload, label, suffix = '' }) => {
 const Analytics = () => {
   const [activeTab, setActiveTab] = useState('students');
   const [loading, setLoading] = useState(true);
-  
-  // Analytics State
+
   const [studentData, setStudentData] = useState({
     performanceRanges: [],
     averageScoresByCategory: [],
@@ -90,25 +89,21 @@ const Analytics = () => {
     );
   }
 
-  // Format data for difficulty pie chart
   const difficultyPieData = testData.testDifficultyCount.map(d => ({
     name: d._id ? d._id.charAt(0).toUpperCase() + d._id.slice(1) : 'Unknown',
     value: d.count || 0
   }));
 
-  // Format performance range for chart
   const performanceChartData = studentData.performanceRanges.map(range => ({
     name: range.name,
     Count: range.count
   }));
 
-  // Format average category scores
   const avgCategoryChartData = studentData.averageScoresByCategory.map(cat => ({
     name: cat.categoryName,
     'Average Score (%)': cat.avgPercentage
   }));
 
-  // Format category distributions
   const questionsPerCategoryData = categoryData.questionsDistribution.map(cat => ({
     name: cat.categoryName,
     value: cat.count
@@ -124,9 +119,6 @@ const Analytics = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">System Analytics</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Deep-dive analysis of student activity, test score ranges, category distributions, and overall compiler performance.
-        </p>
       </div>
 
       {/* Tabs Menu */}
@@ -189,9 +181,6 @@ const Analytics = () => {
                   <BarChart3 className="w-4 h-4 text-indigo-500" />
                   Score Distribution
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Number of students grouped by their total leaderboard scores.
-                </p>
               </div>
 
               {performanceChartData.length > 0 ? (
@@ -224,9 +213,6 @@ const Analytics = () => {
                   <Activity className="w-4 h-4 text-indigo-500" />
                   Avg Test Score by Category
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Average percentage obtained by students in different categories.
-                </p>
               </div>
 
               {avgCategoryChartData.length > 0 ? (
@@ -260,9 +246,6 @@ const Analytics = () => {
                 <Award className="w-5 h-5 text-amber-500" />
                 Elite Performers (Top 5)
               </h3>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                Students leading the platform rankings based on solved MCQ tests, coding challenges, and interview rounds.
-              </p>
             </div>
 
             <div className="overflow-x-auto">
@@ -280,7 +263,7 @@ const Analytics = () => {
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40 text-sm">
                   {studentData.topPerformers.length > 0 ? (
                     studentData.topPerformers
-                      .filter(item => item.user?.email !== 'admin@oitstack.com')
+                      .filter(item => item.user?.email !== 'admin@oit_stack.com')
                       .map((item, idx) => (
                       <tr key={item._id || idx} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
                         <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300">
@@ -342,9 +325,6 @@ const Analytics = () => {
                   <PieChartIcon className="w-4 h-4 text-indigo-500" />
                   Tests by Difficulty
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Distribution of created tests in categories.
-                </p>
               </div>
 
               {difficultyPieData.length > 0 ? (
@@ -393,9 +373,6 @@ const Analytics = () => {
                   <CheckCircle className="w-4 h-4 text-emerald-500" />
                   Placement Test Insights
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Submissions counts, pass/fail ratios, and average marks across exams.
-                </p>
               </div>
 
               <div className="overflow-y-auto max-h-[300px]">
@@ -451,9 +428,6 @@ const Analytics = () => {
                   <HelpCircle className="w-4 h-4 text-purple-500" />
                   MCQ Questions by Category
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Breakdown of active MCQs currently stored inside categories.
-                </p>
               </div>
 
               {questionsPerCategoryData.length > 0 ? (
@@ -499,9 +473,6 @@ const Analytics = () => {
                   <BookOpen className="w-4 h-4 text-blue-500" />
                   Active Tests by Category
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                  Distributions of tests categorized under Aptitude, Coding, or Technical blocks.
-                </p>
               </div>
 
               {testsPerCategoryData.length > 0 ? (
@@ -547,3 +518,4 @@ const Analytics = () => {
 };
 
 export default Analytics;
+

@@ -4,11 +4,6 @@ const Subcategory = require('../models/Subcategory');
 const mongoose = require('mongoose');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get questions list (paginated, filtered, admin only)
- * @route   GET /api/questions
- * @access  Private/Admin
- */
 const getQuestions = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -23,12 +18,10 @@ const getQuestions = async (req, res) => {
     if (difficulty) filter.difficulty = difficulty;
     if (type) filter.type = type;
 
-    // Search query on question text
     if (search) {
       filter.question = { $regex: search, $options: 'i' };
     }
 
-    // Admins can see inactive questions too if they want
     if (req.query.includeInactive === 'true') {
       delete filter.isActive;
     }
@@ -57,11 +50,6 @@ const getQuestions = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single question by ID
- * @route   GET /api/questions/:id
- * @access  Private/Admin
- */
 const getQuestion = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id)
@@ -79,11 +67,6 @@ const getQuestion = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create question
- * @route   POST /api/questions
- * @access  Private/Admin
- */
 const createQuestion = async (req, res) => {
   try {
     const {
@@ -100,13 +83,11 @@ const createQuestion = async (req, res) => {
       type,
     } = req.body;
 
-    // Verify parent category exists
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return errorResponse(res, 400, 'Invalid category ID');
     }
 
-    // Verify subcategory exists if provided
     if (subcategory) {
       const subcategoryExists = await Subcategory.findOne({ _id: subcategory, category });
       if (!subcategoryExists) {
@@ -136,11 +117,6 @@ const createQuestion = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update question
- * @route   PUT /api/questions/:id
- * @access  Private/Admin
- */
 const updateQuestion = async (req, res) => {
   try {
     const { category, subcategory } = req.body;
@@ -177,11 +153,6 @@ const updateQuestion = async (req, res) => {
   }
 };
 
-/**
- * @desc    Soft-delete question (set isActive to false)
- * @route   DELETE /api/questions/:id
- * @access  Private/Admin
- */
 const deleteQuestion = async (req, res) => {
   try {
     const question = await Question.findByIdAndUpdate(
@@ -201,11 +172,6 @@ const deleteQuestion = async (req, res) => {
   }
 };
 
-/**
- * @desc    Bulk import questions
- * @route   POST /api/questions/bulk
- * @access  Private/Admin
- */
 const bulkImportQuestions = async (req, res) => {
   try {
     const { questions } = req.body;
@@ -221,7 +187,6 @@ const bulkImportQuestions = async (req, res) => {
       const q = questions[i];
       const index = i + 1;
 
-      // Basic validation
       if (!q.question) {
         errors.push(`Row ${index}: Question text is required`);
         continue;
@@ -239,13 +204,11 @@ const bulkImportQuestions = async (req, res) => {
         continue;
       }
 
-      // Validate category ObjectId format
       if (!mongoose.Types.ObjectId.isValid(q.category)) {
         errors.push(`Row ${index}: Category ID "${q.category}" must be a valid 24-character hex ObjectId string`);
         continue;
       }
 
-      // Check category existence
       const categoryExists = await Category.findById(q.category);
       if (!categoryExists) {
         errors.push(`Row ${index}: Category ID "${q.category}" does not exist`);
@@ -253,7 +216,6 @@ const bulkImportQuestions = async (req, res) => {
       }
 
       if (q.subcategory) {
-        // Validate subcategory ObjectId format
         if (!mongoose.Types.ObjectId.isValid(q.subcategory)) {
           errors.push(`Row ${index}: Subcategory ID "${q.subcategory}" must be a valid 24-character hex ObjectId string`);
           continue;
@@ -305,3 +267,4 @@ module.exports = {
   deleteQuestion,
   bulkImportQuestions,
 };
+

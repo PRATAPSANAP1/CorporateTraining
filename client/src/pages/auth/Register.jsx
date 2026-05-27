@@ -1,14 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Mail, Lock, Eye, EyeOff, UserPlus, GraduationCap, User, Building2,
+  Mail, Lock, Eye, EyeOff, UserPlus, User, Building2,
   GitBranch, Calendar, ArrowRight, ArrowLeft, CheckCircle2, Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { register } from '../../store/slices/authSlice';
 
+const InputField = ({ icon: Icon, label, name, type = 'text', placeholder, value, error, autoComplete, rightElement, inputRef, onChange }) => (
+  <div>
+    <label htmlFor={name} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <Icon className={`w-5 h-5 ${error ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'}`} />
+      </div>
+      <input
+        ref={inputRef}
+        id={name}
+        name={name}
+        type={type}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full pl-12 ${rightElement ? 'pr-12' : 'pr-4'} py-3.5 rounded-xl border bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 ${
+          error
+            ? 'border-red-300 dark:border-red-500 focus:ring-red-500/20'
+            : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400'
+        }`}
+      />
+      {rightElement}
+    </div>
+    {error && (
+      <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
+        <span className="inline-block w-1 h-1 bg-red-500 rounded-full" />
+        {error}
+      </p>
+    )}
+  </div>
+);
+
 const Register = () => {
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth || {});
@@ -38,7 +75,6 @@ const Register = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  // Validate step 1 fields
   const validateStep1 = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
@@ -61,7 +97,6 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Validate step 2 fields
   const validateStep2 = () => {
     const newErrors = {};
     if (!formData.college.trim()) newErrors.college = 'College name is required';
@@ -110,41 +145,6 @@ const Register = () => {
 
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
-  // Reusable input component
-  const InputField = ({ icon: Icon, label, name, type = 'text', placeholder, value, error, autoComplete, rightElement }) => (
-    <div>
-      <label htmlFor={name} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-        {label}
-      </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Icon className={`w-5 h-5 ${error ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'}`} />
-        </div>
-        <input
-          id={name}
-          name={name}
-          type={type}
-          autoComplete={autoComplete}
-          value={value}
-          onChange={handleChange}
-          placeholder={placeholder}
-          className={`w-full pl-12 ${rightElement ? 'pr-12' : 'pr-4'} py-3.5 rounded-xl border bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 transition-all duration-200 ${
-            error
-              ? 'border-red-300 dark:border-red-500 focus:ring-red-500/20'
-              : 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400'
-          }`}
-        />
-        {rightElement}
-      </div>
-      {error && (
-        <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
-          <span className="inline-block w-1 h-1 bg-red-500 rounded-full" />
-          {error}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950">
       {/* Left Panel — Decorative */}
@@ -159,11 +159,9 @@ const Register = () => {
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20 text-white w-full">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center border border-white/30 shadow-lg">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
+            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-14 h-14 object-contain rounded-2xl border border-white/20 shadow-lg bg-white" />
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">OITSTACK</h1>
+              <h1 className="text-2xl font-bold tracking-tight">OIT_STACK</h1>
               <p className="text-blue-200 text-sm">Your gateway to success</p>
             </div>
           </div>
@@ -222,10 +220,8 @@ const Register = () => {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <GraduationCap className="w-7 h-7 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">OITSTACK</h1>
+            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-12 h-12 object-contain rounded-xl shadow-md bg-white border border-slate-100 dark:border-slate-800" />
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">OIT_STACK</h1>
           </div>
 
           {/* Step Indicator - Mobile */}
@@ -269,6 +265,7 @@ const Register = () => {
                   value={formData.name}
                   error={errors.name}
                   autoComplete="name"
+                  onChange={handleChange}
                 />
                 <InputField
                   icon={Mail}
@@ -279,6 +276,7 @@ const Register = () => {
                   value={formData.email}
                   error={errors.email}
                   autoComplete="email"
+                  onChange={handleChange}
                 />
                 <InputField
                   icon={Lock}
@@ -289,10 +287,18 @@ const Register = () => {
                   value={formData.password}
                   error={errors.password}
                   autoComplete="new-password"
+                  inputRef={passwordRef}
+                  onChange={handleChange}
                   rightElement={
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => {
+                        setShowPassword(!showPassword);
+                        setTimeout(() => {
+                          passwordRef.current?.focus();
+                        }, 0);
+                      }}
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -308,10 +314,18 @@ const Register = () => {
                   value={formData.confirmPassword}
                   error={errors.confirmPassword}
                   autoComplete="new-password"
+                  inputRef={confirmPasswordRef}
+                  onChange={handleChange}
                   rightElement={
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => {
+                        setShowConfirmPassword(!showConfirmPassword);
+                        setTimeout(() => {
+                          confirmPasswordRef.current?.focus();
+                        }, 0);
+                      }}
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -375,7 +389,7 @@ const Register = () => {
                       name="college"
                       value={formData.college}
                       onChange={handleChange}
-                      placeholder="e.g. OITSTACK"
+                      placeholder="e.g. OIT_STACK"
                       className={`w-full pl-12 pr-4 py-3.5 rounded-xl border bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                         errors.college ? 'border-red-300 focus:ring-red-500/20' : 'border-slate-200 dark:border-slate-700 focus:ring-blue-500/20 focus:border-blue-500'
                       }`}
@@ -486,3 +500,4 @@ const Register = () => {
 };
 
 export default Register;
+

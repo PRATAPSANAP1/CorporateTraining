@@ -1,12 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * CodingSubmission Schema
- *
- * Records a user's code submission for a specific coding problem.
- * Tracks the language, submitted code, execution results (status,
- * test cases passed, execution time, memory), and any errors.
- */
 const codingSubmissionSchema = new mongoose.Schema(
   {
     user: {
@@ -73,12 +66,9 @@ const codingSubmissionSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Compound index on user + problem.
- * Enables efficient lookup of all submissions by a user for a specific problem.
- */
 codingSubmissionSchema.index({ user: 1, problem: 1 });
 
 const CodingSubmission = mongoose.model('CodingSubmission', codingSubmissionSchema);
 
 module.exports = CodingSubmission;
+

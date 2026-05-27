@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import adminService from '../../services/adminService';
 
-// Dashboard stats
 export const fetchDashboardStats = createAsyncThunk('admin/fetchDashboardStats', async (_, { rejectWithValue }) => {
   try {
     const response = await adminService.getDashboardStats();
@@ -11,7 +10,6 @@ export const fetchDashboardStats = createAsyncThunk('admin/fetchDashboardStats',
   }
 });
 
-// Fetch students
 export const fetchStudents = createAsyncThunk('admin/fetchStudents', async (params, { rejectWithValue }) => {
   try {
     const response = await adminService.getStudents(params);
@@ -21,7 +19,6 @@ export const fetchStudents = createAsyncThunk('admin/fetchStudents', async (para
   }
 });
 
-// Fetch questions
 export const fetchQuestions = createAsyncThunk('admin/fetchQuestions', async (params, { rejectWithValue }) => {
   try {
     const response = await adminService.getQuestions(params);
@@ -31,7 +28,6 @@ export const fetchQuestions = createAsyncThunk('admin/fetchQuestions', async (pa
   }
 });
 
-// Fetch tests
 export const fetchTests = createAsyncThunk('admin/fetchTests', async (params, { rejectWithValue }) => {
   try {
     const response = await adminService.getTests(params);
@@ -41,7 +37,6 @@ export const fetchTests = createAsyncThunk('admin/fetchTests', async (params, { 
   }
 });
 
-// Fetch categories
 export const fetchCategories = createAsyncThunk('admin/fetchCategories', async (_, { rejectWithValue }) => {
   try {
     const response = await adminService.getCategories();
@@ -51,7 +46,6 @@ export const fetchCategories = createAsyncThunk('admin/fetchCategories', async (
   }
 });
 
-// Fetch results
 export const fetchResults = createAsyncThunk('admin/fetchResults', async (params, { rejectWithValue }) => {
   try {
     const response = await adminService.getResults(params);
@@ -82,7 +76,6 @@ const adminSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Dashboard stats
       .addCase(fetchDashboardStats.pending, (state) => { state.isLoading = true; })
       .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -92,7 +85,6 @@ const adminSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Students
       .addCase(fetchStudents.pending, (state) => { state.isLoading = true; })
       .addCase(fetchStudents.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -102,7 +94,6 @@ const adminSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Questions
       .addCase(fetchQuestions.pending, (state) => { state.isLoading = true; })
       .addCase(fetchQuestions.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -112,7 +103,6 @@ const adminSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Tests
       .addCase(fetchTests.pending, (state) => { state.isLoading = true; })
       .addCase(fetchTests.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -122,7 +112,6 @@ const adminSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Categories
       .addCase(fetchCategories.pending, (state) => { state.isLoading = true; })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -132,7 +121,6 @@ const adminSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Results
       .addCase(fetchResults.pending, (state) => { state.isLoading = true; })
       .addCase(fetchResults.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -147,3 +135,4 @@ const adminSlice = createSlice({
 
 export const { clearAdminError, setCategories, setSubcategories } = adminSlice.actions;
 export default adminSlice.reducer;
+

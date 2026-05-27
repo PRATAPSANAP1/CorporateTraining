@@ -1,11 +1,5 @@
 import { DIFFICULTY_COLORS, SUBMISSION_STATUS } from './constants';
 
-/**
- * Format a date string/object into a human-readable format
- * @param {string|Date} date - Date to format
- * @param {object} options - Intl.DateTimeFormat options
- * @returns {string} Formatted date string
- */
 export const formatDate = (date, options = {}) => {
   if (!date) return 'N/A';
 
@@ -23,11 +17,6 @@ export const formatDate = (date, options = {}) => {
   }
 };
 
-/**
- * Format a date with time
- * @param {string|Date} date
- * @returns {string}
- */
 export const formatDateTime = (date) => {
   if (!date) return 'N/A';
   try {
@@ -43,11 +32,6 @@ export const formatDateTime = (date) => {
   }
 };
 
-/**
- * Format seconds into MM:SS display format (e.g. for test timer)
- * @param {number} seconds - Total seconds
- * @returns {string} Formatted time string "MM:SS"
- */
 export const formatTime = (seconds) => {
   if (seconds == null || seconds < 0) return '00:00';
 
@@ -62,11 +46,6 @@ export const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-/**
- * Extract initials from a full name (max 2 characters)
- * @param {string} name - Full name
- * @returns {string} Uppercase initials
- */
 export const getInitials = (name) => {
   if (!name) return '?';
 
@@ -79,57 +58,28 @@ export const getInitials = (name) => {
     .toUpperCase();
 };
 
-/**
- * Truncate text to a maximum length, appending ellipsis
- * @param {string} text - Text to truncate
- * @param {number} maxLength - Maximum character length
- * @returns {string} Truncated text
- */
 export const truncateText = (text, maxLength = 100) => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trimEnd() + '...';
 };
 
-/**
- * Calculate percentage with optional decimal places
- * @param {number} obtained - Obtained value
- * @param {number} total - Total value
- * @param {number} decimals - Decimal places (default: 1)
- * @returns {number} Percentage value
- */
 export const calculatePercentage = (obtained, total, decimals = 1) => {
   if (!total || total === 0) return 0;
   const pct = (obtained / total) * 100;
   return Number(pct.toFixed(decimals));
 };
 
-/**
- * Get Tailwind CSS color classes for a difficulty level
- * @param {string} difficulty - 'easy' | 'medium' | 'hard'
- * @returns {object} Color classes { bg, text, border, dot, gradient }
- */
 export const getDifficultyColor = (difficulty) => {
   const key = difficulty?.toLowerCase();
   return DIFFICULTY_COLORS[key] || DIFFICULTY_COLORS.medium;
 };
 
-/**
- * Get color information for a coding submission status
- * @param {string} status - Submission status code
- * @returns {object} Status info { label, color, bg }
- */
 export const getStatusColor = (status) => {
   const key = status?.toUpperCase()?.replace(/\s+/g, '_');
   return SUBMISSION_STATUS[key] || SUBMISSION_STATUS.PENDING;
 };
 
-/**
- * Create a debounced version of a function
- * @param {Function} func - Function to debounce
- * @param {number} wait - Milliseconds to wait
- * @returns {Function} Debounced function with cancel method
- */
 export const debounce = (func, wait = 300) => {
   let timeoutId;
 
@@ -145,11 +95,6 @@ export const debounce = (func, wait = 300) => {
   return debounced;
 };
 
-/**
- * Generate a relative time string (e.g. "2 hours ago")
- * @param {string|Date} date
- * @returns {string}
- */
 export const timeAgo = (date) => {
   if (!date) return '';
 
@@ -168,30 +113,13 @@ export const timeAgo = (date) => {
   return formatDate(date);
 };
 
-/**
- * Capitalize the first letter of a string
- * @param {string} str
- * @returns {string}
- */
 export const capitalize = (str) => {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-/**
- * Clamp a number between min and max
- * @param {number} value
- * @param {number} min
- * @param {number} max
- * @returns {number}
- */
 export const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-/**
- * Format a large number with K/M suffix
- * @param {number} num
- * @returns {string}
- */
 export const formatNumber = (num) => {
   if (num == null) return '0';
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
@@ -199,11 +127,6 @@ export const formatNumber = (num) => {
   return num.toString();
 };
 
-/**
- * Generate a random color class for avatar backgrounds
- * @param {string} name - User's name to deterministically pick a color
- * @returns {string} Tailwind gradient class
- */
 export const getAvatarColor = (name) => {
   const colors = [
     'from-blue-500 to-indigo-600',
@@ -221,11 +144,6 @@ export const getAvatarColor = (name) => {
   return colors[index];
 };
 
-/**
- * Build query string from params object, filtering out empty values
- * @param {object} params
- * @returns {string}
- */
 export const buildQueryString = (params) => {
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -235,3 +153,4 @@ export const buildQueryString = (params) => {
   });
   return searchParams.toString();
 };
+

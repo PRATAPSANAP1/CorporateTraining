@@ -35,7 +35,6 @@ const Table = ({
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-200">
             {loading ? (
-              // Inside the table body, render table loading cells
               <tr>
                 <td colSpan={columns.length} className="px-6 py-8">
                   <div className="flex flex-col gap-4 animate-pulse">
@@ -86,3 +85,4 @@ const Table = ({
 };
 
 export default Table;
+

@@ -4,19 +4,16 @@ import { Toaster } from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { loadUser, logout } from './store/slices/authSlice';
 
-// Layouts & Guards
 import StudentLayout from './layouts/StudentLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 
-// Auth Pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 
-// Student Pages
 import Dashboard from './pages/student/Dashboard';
 import TestList from './pages/student/TestList';
 import TestStart from './pages/student/TestStart';
@@ -31,7 +28,6 @@ import Leaderboard from './pages/student/Leaderboard';
 import Results from './pages/student/Results';
 import Profile from './pages/student/Profile';
 
-// Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageStudents from './pages/admin/ManageStudents';
 import ManageQuestions from './pages/admin/ManageQuestions';
@@ -48,7 +44,6 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Attempt to load the user profile if a token exists in local storage
     if (localStorage.getItem('token')) {
       dispatch(loadUser());
     } else {
@@ -152,3 +147,4 @@ function App() {
 }
 
 export default App;
+

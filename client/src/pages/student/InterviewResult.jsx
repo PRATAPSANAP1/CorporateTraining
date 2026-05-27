@@ -23,7 +23,7 @@ const InterviewResult = () => {
         const res = await interviewService.getHistory();
         const records = res.data || [];
         const currentRecord = records.find(r => r._id === id) || records[0];
-        
+
         if (!currentRecord) {
           toast.error('No interview feedback session found.');
           navigate('/student/interview');
@@ -194,3 +194,4 @@ const InterviewResult = () => {
 };
 
 export default InterviewResult;
+

@@ -20,14 +20,12 @@ const TestList = () => {
   const [tests, setTests] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Filters
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [difficulty, setDifficulty] = useState('');
 
   useEffect(() => {
-    // Fetch categories for filtering
     const loadCategories = async () => {
       try {
         const res = await categoryService.getCategories();
@@ -43,7 +41,6 @@ const TestList = () => {
     loadCategories();
   }, []);
 
-  // Update category filter if URL search param changes
   useEffect(() => {
     setSelectedCategory(searchParams.get('category') || '');
   }, [searchParams]);
@@ -54,24 +51,21 @@ const TestList = () => {
         setLoading(true);
         const params = {};
         if (selectedCategory) {
-          // Find the category ID from options matching the slug/name
           const matchedCat = categories.find(
             c => c.label.toLowerCase() === selectedCategory.toLowerCase() || c.value === selectedCategory
           );
           if (matchedCat) {
             params.category = matchedCat.value;
           } else {
-            // Or pass raw if it is an ID
             params.category = selectedCategory;
           }
         }
         if (difficulty) {
           params.difficulty = difficulty;
         }
-        
+
         const res = await testService.getTests(params);
-        
-        // Local filtering for search text if any
+
         let filteredTests = res.data;
         if (search) {
           filteredTests = filteredTests.filter(t => 
@@ -88,7 +82,6 @@ const TestList = () => {
       }
     };
 
-    // Delay fetch slightly until categories are populated if selectedCategory exists
     fetchTests();
   }, [selectedCategory, difficulty, search, categories]);
 
@@ -103,12 +96,8 @@ const TestList = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Placement Preparation Tests</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Select a test based on your preference to verify and sharpen your aptitude or technical core competencies.
-        </p>
       </div>
 
       {/* Filter Row */}
@@ -205,7 +194,7 @@ const TestList = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <Button
                   variant="primary"
                   className="font-bold py-2"
@@ -223,3 +212,4 @@ const TestList = () => {
 };
 
 export default TestList;
+

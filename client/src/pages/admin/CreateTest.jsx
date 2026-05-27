@@ -17,13 +17,11 @@ const CreateTest = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  
-  // Question Pool states
+
   const [questionPool, setQuestionPool] = useState([]);
   const [loadingPool, setLoadingPool] = useState(false);
   const [poolSearch, setPoolSearch] = useState('');
 
-  // Form Fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -40,7 +38,6 @@ const CreateTest = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  // 1. Fetch categories
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -53,7 +50,6 @@ const CreateTest = () => {
     loadCategories();
   }, []);
 
-  // 2. Fetch subcategories when category changes
   useEffect(() => {
     if (!category) {
       setSubcategories([]);
@@ -70,7 +66,6 @@ const CreateTest = () => {
     loadSubcategories();
   }, [category]);
 
-  // 3. Fetch questions matching the selected Category to select from
   useEffect(() => {
     if (!category) {
       setQuestionPool([]);
@@ -94,7 +89,6 @@ const CreateTest = () => {
     fetchQuestionPool();
   }, [category]);
 
-  // 4. Load test details if editing
   useEffect(() => {
     if (!isEdit) return;
 
@@ -117,7 +111,7 @@ const CreateTest = () => {
         setShuffleOptions(test.shuffleOptions || false);
         setIsActive(test.isActive !== undefined ? test.isActive : true);
         setSelectedQuestions(test.questions?.map(q => q._id || q) || []);
-        
+
         if (test.startDate) {
           setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
         }
@@ -218,7 +212,6 @@ const CreateTest = () => {
 
   if (loading && !name) return <Loader />;
 
-  // Filter pool questions on local search text
   const filteredPool = questionPool.filter(q =>
     q.question.toLowerCase().includes(poolSearch.toLowerCase())
   );
@@ -235,24 +228,20 @@ const CreateTest = () => {
         </Link>
       </div>
 
-      {/* Title */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white font-black">
           {isEdit ? 'Modify Test Session' : 'Create Timed Test'}
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          {isEdit ? 'Update exam properties, schedule dates, or modify question sheets.' : 'Create a timed examination composed of existing pool questions.'}
-        </p>
       </div>
 
       {/* Form Panel */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
+
         {/* Basic options left side */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <Card hover={false} className="p-6 flex flex-col gap-5">
             <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-50 dark:border-slate-800">Basic Configurations</h3>
-            
+
             <Input
               label="Test Name"
               value={name}
@@ -534,3 +523,4 @@ const CreateTest = () => {
 };
 
 export default CreateTest;
+

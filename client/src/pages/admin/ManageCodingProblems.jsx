@@ -18,12 +18,10 @@ const ManageCodingProblems = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [difficulty, setDifficulty] = useState('');
 
-  // Dialogs
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetId, setTargetId] = useState(null);
 
@@ -36,7 +34,7 @@ const ManageCodingProblems = () => {
 
       const res = await adminService.getCodingProblems(params);
       let list = res.data.problems || [];
-      
+
       if (search) {
         list = list.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
       }
@@ -99,9 +97,6 @@ const ManageCodingProblems = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Sandbox Problems</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Maintain sandboxed coding challenges, assign points, and manage test cases.
-          </p>
         </div>
 
         <Button
@@ -238,3 +233,4 @@ const ManageCodingProblems = () => {
 };
 
 export default ManageCodingProblems;
+

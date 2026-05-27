@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Leaderboard Schema
- *
- * Aggregated performance record per user. Tracks total score,
- * per-category scores (aptitude, technical, coding), number of
- * tests completed, coding problems solved, and computed rank.
- * The totalScore index enables efficient ranking queries.
- */
 const leaderboardSchema = new mongoose.Schema(
   {
     user: {
@@ -54,11 +46,9 @@ const leaderboardSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Descending index on totalScore for efficient leaderboard ranking queries.
- */
 leaderboardSchema.index({ totalScore: -1 });
 
 const Leaderboard = mongoose.model('Leaderboard', leaderboardSchema);
 
 module.exports = Leaderboard;
+

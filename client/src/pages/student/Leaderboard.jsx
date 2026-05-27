@@ -11,7 +11,7 @@ import EmptyState from '../../components/common/EmptyState';
 
 const Leaderboard = () => {
   const { user } = useSelector((state) => state.auth);
-  
+
   const [loading, setLoading] = useState(true);
   const [board, setBoard] = useState([]);
   const [myRank, setMyRank] = useState(null);
@@ -28,7 +28,7 @@ const Leaderboard = () => {
           limit: 15,
         });
 
-        setBoard((res.data.leaderboard || []).filter(item => item.user?.email !== 'admin@oitstack.com'));
+        setBoard((res.data.leaderboard || []).filter(item => item.user?.email !== 'admin@oit_stack.com'));
         setMyRank(res.data.myRank);
         setPagination({
           page: res.data.pagination.page,
@@ -46,7 +46,6 @@ const Leaderboard = () => {
 
   if (loading && pagination.page === 1) return <Loader />;
 
-  // Separate top 3 podium if on page 1
   const podiumList = pagination.page === 1 ? board.slice(0, 3) : [];
   const listRows = pagination.page === 1 ? board.slice(3) : board;
 
@@ -58,7 +57,6 @@ const Leaderboard = () => {
   };
 
   const getPodiumOrder = (podium) => {
-    // Return order: 2nd place, 1st place, 3rd place
     const order = [];
     if (podium[1]) order.push(podium[1]); // 2nd
     if (podium[0]) order.push(podium[0]); // 1st
@@ -68,12 +66,8 @@ const Leaderboard = () => {
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto pb-12">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Global Placement Leaderboard</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Perform well in timed aptitude/technical tests and solve coding sandbox problems to accumulate points and reach the top!
-        </p>
       </div>
 
       {/* Top 3 Podium (Visual) */}
@@ -82,8 +76,7 @@ const Leaderboard = () => {
           {getPodiumOrder(podiumList).map((entry) => {
             const rank = entry.rank;
             const isMe = entry.user?._id === user?._id;
-            
-            // Adjust card height for podium hierarchy: 1st is tallest, then 2nd, then 3rd
+
             let height = 'h-52';
             let border = 'border-slate-100 dark:border-slate-800/80';
             let trophyColor = 'text-slate-400';
@@ -124,7 +117,7 @@ const Leaderboard = () => {
                     {entry.user?.name || 'Candidate'}
                   </h4>
                   <p className="text-[10px] text-slate-400 line-clamp-1 max-w-[130px] font-medium mt-0.5">
-                    {entry.user?.college || 'OITSTACK'}
+                    {entry.user?.college || 'OIT_STACK'}
                   </p>
                 </div>
 
@@ -205,7 +198,7 @@ const Leaderboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        {entry.user?.college || 'OITSTACK'} | {entry.user?.branch || 'General'}
+                        {entry.user?.college || 'OIT_STACK'} | {entry.user?.branch || 'General'}
                       </td>
                       <td className="px-6 py-4 text-center text-slate-600 dark:text-slate-300">
                         {entry.testsCompleted}
@@ -253,3 +246,4 @@ const Leaderboard = () => {
 };
 
 export default Leaderboard;
+

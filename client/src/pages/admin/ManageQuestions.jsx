@@ -18,14 +18,12 @@ const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Filters
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
-  // Dialogs
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetId, setTargetId] = useState(null);
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -60,7 +58,6 @@ const ManageQuestions = () => {
   };
 
   useEffect(() => {
-    // Fetch categories for filter dropdown
     const loadCategories = async () => {
       try {
         const res = await adminService.getCategories();
@@ -105,7 +102,7 @@ const ManageQuestions = () => {
     try {
       setImporting(true);
       const parsed = JSON.parse(bulkJson);
-      
+
       const res = await adminService.bulkImportQuestions({ questions: parsed });
       toast.success(res.message || `Successfully imported ${res.data?.importedCount || 0} questions!`);
       setBulkOpen(false);
@@ -154,9 +151,6 @@ const ManageQuestions = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white">Questions Repository</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Maintain technical and aptitude questions, manage difficulties, or bulk import questions.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -387,3 +381,4 @@ const ManageQuestions = () => {
 };
 
 export default ManageQuestions;
+

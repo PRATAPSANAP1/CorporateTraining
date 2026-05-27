@@ -1,4 +1,4 @@
-# 🎓 OITSTACK Preparation Portal
+# OIT_STACK Preparation Portal
 
 A comprehensive full-stack web application to help students prepare for campus placements. Built with the MERN stack (MongoDB, Express.js, React, Node.js).
 
@@ -175,7 +175,7 @@ npm run dev
 - **API Health Check**: http://localhost:5000/api/health
 
 ### Default Admin Credentials
-- **Email**: admin@oitstack.com
+- **Email**: admin@oit_stack.com
 - **Password**: Admin@123
 
 ⚠️ **Change the admin password after first login!**
@@ -286,7 +286,7 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Built for
 
-**OITSTACK (Malnad College of Engineering), Hassan**  
+**OIT_STACK (Malnad College of Engineering), Hassan**  
 Placement Preparation Portal for Campus Recruitment
 
 ---

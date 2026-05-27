@@ -5,11 +5,6 @@ const Leaderboard = require('../models/Leaderboard');
 const mongoose = require('mongoose');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get all students (Admin only, paginated and searchable)
- * @route   GET /api/users
- * @access  Private/Admin
- */
 const getUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -52,11 +47,6 @@ const getUsers = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single user by ID (Admin only)
- * @route   GET /api/users/:id
- * @access  Private/Admin
- */
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -70,11 +60,6 @@ const getUser = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update user details (Admin only)
- * @route   PUT /api/users/:id
- * @access  Private/Admin
- */
 const updateUser = async (req, res) => {
   try {
     const { name, email, role, phone, college, branch, year } = req.body;
@@ -84,7 +69,6 @@ const updateUser = async (req, res) => {
       return errorResponse(res, 404, 'User not found');
     }
 
-    // Update fields if provided
     if (name) user.name = name;
     if (email) user.email = email;
     if (role) user.role = role;
@@ -105,11 +89,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete user (Admin only)
- * @route   DELETE /api/users/:id
- * @access  Private/Admin
- */
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -117,11 +96,7 @@ const deleteUser = async (req, res) => {
       return errorResponse(res, 404, 'User not found');
     }
 
-    // Delete associated leaderboard entry
     await Leaderboard.deleteOne({ user: req.params.id });
-    
-    // We could delete results/submissions, but keeping them keeps records consistent.
-    // Soft deleting or leaving orphaned records is typical.
 
     return successResponse(res, 200, 'User deleted successfully');
   } catch (error) {
@@ -130,11 +105,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get detailed performance statistics for a student (Admin only)
- * @route   GET /api/users/:id/stats
- * @access  Private/Admin
- */
 const getUserStats = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -143,37 +113,30 @@ const getUserStats = async (req, res) => {
       return errorResponse(res, 400, 'Invalid User ID');
     }
 
-    // Check user exists
     const user = await User.findById(userId);
     if (!user) {
       return errorResponse(res, 404, 'User not found');
     }
 
-    // 1. Get tests count
     const testsCount = await Result.countDocuments({ user: userId });
 
-    // 2. Average test percentage
     const avgPercentageResult = await Result.aggregate([
       { $match: { user: new mongoose.Types.ObjectId(userId) } },
       { $group: { _id: null, avg: { $avg: '$percentage' } } }
     ]);
     const avgPercentage = (avgPercentageResult.length > 0 && typeof avgPercentageResult[0].avg === 'number') ? avgPercentageResult[0].avg : 0;
 
-    // 3. Tests passed vs failed
     const passedCount = await Result.countDocuments({ user: userId, passed: true });
     const failedCount = testsCount - passedCount;
 
-    // 4. Unique solved coding problems
     const solvedProblems = await CodingSubmission.find({
       user: userId,
       status: 'accepted'
     }).distinct('problem');
     const solvedCount = solvedProblems.length;
 
-    // 5. Total coding submissions
     const codingSubmissionsCount = await CodingSubmission.countDocuments({ user: userId });
 
-    // 6. Get leaderboard standings
     const leaderboardEntry = await Leaderboard.findOne({ user: userId });
 
     return successResponse(res, 200, 'User statistics retrieved successfully', {
@@ -200,3 +163,4 @@ module.exports = {
   deleteUser,
   getUserStats,
 };
+

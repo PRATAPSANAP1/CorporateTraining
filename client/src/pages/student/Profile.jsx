@@ -16,7 +16,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
-    college: user?.college || 'OITSTACK',
+    college: user?.college || 'OIT_STACK',
     branch: user?.branch || '',
     year: user?.year || '',
   });
@@ -40,8 +40,7 @@ const Profile = () => {
       setSaving(true);
       await authService.updateProfile(formData);
       toast.success('Profile details updated successfully!');
-      
-      // Reload updated user details in store
+
       dispatch(loadUser());
       setEditMode(false);
     } catch (err) {
@@ -54,12 +53,8 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-12">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white font-black">Student Profile</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Manage your personal academic details and view your composite placement portal metrics.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -81,7 +76,7 @@ const Profile = () => {
             </div>
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-slate-400" />
-              <span>College: {user?.college || 'OITSTACK'}</span>
+              <span>College: {user?.college || 'OIT_STACK'}</span>
             </div>
           </div>
         </Card>
@@ -93,11 +88,10 @@ const Profile = () => {
             <button
               onClick={() => {
                 if (editMode) {
-                  // Cancel changes, revert state
                   setFormData({
                     name: user?.name || '',
                     phone: user?.phone || '',
-                    college: user?.college || 'OITSTACK',
+                    college: user?.college || 'OIT_STACK',
                     branch: user?.branch || '',
                     year: user?.year || '',
                   });
@@ -137,7 +131,7 @@ const Profile = () => {
                 onChange={(e) => handleInputChange('college', e.target.value)}
                 disabled={!editMode}
                 icon={BookOpen}
-                placeholder="e.g. OITSTACK"
+                placeholder="e.g. OIT_STACK"
                 className="sm:col-span-2"
               />
               <Input
@@ -189,3 +183,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

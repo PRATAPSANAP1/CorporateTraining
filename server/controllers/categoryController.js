@@ -5,17 +5,11 @@ const Test = require('../models/Test');
 const CodingProblem = require('../models/CodingProblem');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get all categories
- * @route   GET /api/categories
- * @access  Private
- */
 const getCategories = async (req, res) => {
   try {
     const { type } = req.query;
     const filter = { isActive: true };
-    
-    // Admins can see all, students see active only
+
     if (req.user && req.user.role === 'admin') {
       delete filter.isActive;
     }
@@ -32,11 +26,6 @@ const getCategories = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single category by ID
- * @route   GET /api/categories/:id
- * @access  Private
- */
 const getCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -50,11 +39,6 @@ const getCategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create category
- * @route   POST /api/categories
- * @access  Private/Admin
- */
 const createCategory = async (req, res) => {
   try {
     const { name, type, description, icon, isActive } = req.body;
@@ -79,11 +63,6 @@ const createCategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update category
- * @route   PUT /api/categories/:id
- * @access  Private/Admin
- */
 const updateCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(
@@ -103,28 +82,20 @@ const updateCategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete category
- * @route   DELETE /api/categories/:id
- * @access  Private/Admin
- */
 const deleteCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
 
-    // Check if questions are linked to this category
     const questionCount = await Question.countDocuments({ category: categoryId });
     if (questionCount > 0) {
       return errorResponse(res, 400, `Cannot delete category: ${questionCount} questions are associated with it.`);
     }
 
-    // Check if tests are linked
     const testCount = await Test.countDocuments({ category: categoryId });
     if (testCount > 0) {
       return errorResponse(res, 400, `Cannot delete category: ${testCount} tests are associated with it.`);
     }
 
-    // Check if coding problems are linked
     const problemCount = await CodingProblem.countDocuments({ category: categoryId });
     if (problemCount > 0) {
       return errorResponse(res, 400, `Cannot delete category: ${problemCount} coding problems are associated with it.`);
@@ -135,7 +106,6 @@ const deleteCategory = async (req, res) => {
       return errorResponse(res, 404, 'Category not found');
     }
 
-    // Delete subcategories of this category as well
     await Subcategory.deleteMany({ category: categoryId });
 
     return successResponse(res, 200, 'Category and associated subcategories deleted successfully');
@@ -145,11 +115,6 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get subcategories for a category
- * @route   GET /api/categories/:categoryId/subcategories
- * @access  Private
- */
 const getSubcategories = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -167,11 +132,6 @@ const getSubcategories = async (req, res) => {
   }
 };
 
-/**
- * @desc    Create subcategory
- * @route   POST /api/categories/:categoryId/subcategories
- * @access  Private/Admin
- */
 const createSubcategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -182,7 +142,6 @@ const createSubcategory = async (req, res) => {
       return errorResponse(res, 404, 'Parent category not found');
     }
 
-    // Check if subcategory with same name already exists in this category
     const existingSub = await Subcategory.findOne({ name, category: categoryId });
     if (existingSub) {
       return errorResponse(res, 400, 'Subcategory with this name already exists in the category');
@@ -202,11 +161,6 @@ const createSubcategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update subcategory
- * @route   PUT /api/categories/subcategories/:id
- * @access  Private/Admin
- */
 const updateSubcategory = async (req, res) => {
   try {
     const subcategory = await Subcategory.findByIdAndUpdate(
@@ -226,16 +180,10 @@ const updateSubcategory = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete subcategory
- * @route   DELETE /api/categories/subcategories/:id
- * @access  Private/Admin
- */
 const deleteSubcategory = async (req, res) => {
   try {
     const subcategoryId = req.params.id;
 
-    // Check if questions are linked to this subcategory
     const questionCount = await Question.countDocuments({ subcategory: subcategoryId });
     if (questionCount > 0) {
       return errorResponse(res, 400, `Cannot delete subcategory: ${questionCount} questions are associated with it.`);
@@ -264,3 +212,4 @@ module.exports = {
   updateSubcategory,
   deleteSubcategory
 };
+

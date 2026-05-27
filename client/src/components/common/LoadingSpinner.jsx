@@ -1,10 +1,5 @@
 import React from 'react';
 
-/**
- * LoadingSpinner — A premium animated loading spinner.
- * @param {string} size - sm | md | lg
- * @param {string} text - Optional text below spinner
- */
 const LoadingSpinner = ({ size = 'md', text }) => {
   const sizeMap = {
     sm: 'w-6 h-6',
@@ -24,3 +19,4 @@ const LoadingSpinner = ({ size = 'md', text }) => {
 };
 
 export default LoadingSpinner;
+

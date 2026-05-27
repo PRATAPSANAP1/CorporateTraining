@@ -1,16 +1,9 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-/**
- * Pagination — Beautiful pagination with page numbers and prev/next.
- * @param {number} currentPage
- * @param {number} totalPages
- * @param {Function} onPageChange
- */
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
-  // Generate page numbers with ellipsis
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
@@ -81,3 +74,4 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 export default Pagination;
+

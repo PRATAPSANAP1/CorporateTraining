@@ -25,16 +25,15 @@ const problemValidation = [
 
 router.use(auth);
 
-// Student & Admin (Private)
 router.get('/problems', getProblems);
 router.get('/problems/:id', getProblem);
 router.post('/run', runCode);
 router.post('/submit', submitCode);
 router.get('/submissions/:problemId', getMySubmissions);
 
-// Admin Only
 router.post('/problems', admin, validate(problemValidation), createProblem);
 router.put('/problems/:id', admin, updateProblem);
 router.delete('/problems/:id', admin, deleteProblem);
 
 module.exports = router;
+

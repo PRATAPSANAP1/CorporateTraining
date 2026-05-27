@@ -22,7 +22,6 @@ const questionValidation = [
   body('subcategory').optional().isMongoId().withMessage('Subcategory ID must be a valid Mongo ID'),
 ];
 
-// All routes are admin-only
 router.use(auth);
 router.use(admin);
 
@@ -34,3 +33,4 @@ router.delete('/:id', deleteQuestion);
 router.post('/bulk', bulkImportQuestions);
 
 module.exports = router;
+

@@ -28,20 +28,17 @@ const InterviewSession = () => {
   const timerRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // 1. Initialize session on mount
   useEffect(() => {
     const startSession = async () => {
       try {
         setLoading(true);
         const res = await interviewService.startInterview(type);
         setMessages(res.data.history || []);
-        
-        // Start duration counter
+
         timerRef.current = setInterval(() => {
           setSessionTimer(prev => prev + 1);
         }, 1000);
 
-        // Setup Speech Recognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
           const rec = new SpeechRecognition();
@@ -102,7 +99,6 @@ const InterviewSession = () => {
     };
   }, [type, navigate]);
 
-  // Scroll chat to bottom on new messages
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, aiLoading]);
@@ -124,15 +120,13 @@ const InterviewSession = () => {
     e.preventDefault();
     if (!answer.trim()) return;
 
-    // Stop recording if speaking
     if (isRecording) {
       recognitionRef.current.stop();
     }
 
     const currentAnswer = answer;
     setAnswer('');
-    
-    // Add user answer to state messages list
+
     const historyPayload = [...messages];
     setMessages(prev => [...prev, { role: 'user', content: currentAnswer }]);
     setQuestionCount(prev => prev + 1);
@@ -151,7 +145,7 @@ const InterviewSession = () => {
 
   const handleEndInterview = async () => {
     setEndConfirmOpen(false);
-    
+
     try {
       setLoading(true);
       if (timerRef.current) clearInterval(timerRef.current);
@@ -159,8 +153,7 @@ const InterviewSession = () => {
       const res = await interviewService.endInterview(messages, sessionTimer, type);
       const record = res.data;
       toast.success('Interview evaluated successfully! Redirecting...');
-      
-      // Navigate to results page
+
       navigate(`/student/interview/result?id=${record._id}`);
     } catch (err) {
       console.error('End interview error:', err.message);
@@ -331,3 +324,4 @@ const InterviewSession = () => {
 };
 
 export default InterviewSession;
+

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  Brain, Terminal, Code2, Mic, Flame, Award,
+  Brain, Terminal, Code2, Mic, Award,
   Trophy, BookOpen, Clock, Calendar, ChevronRight, CheckCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -36,31 +36,26 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
-        // 1. Get tests history for stats and charts
+
         const resultsRes = await resultService.getMyResults({ limit: 5 });
         const results = resultsRes.data.results || [];
         setRecentResults(results);
 
-        // Get total results count & average
         const allResultsRes = await resultService.getMyResults({ limit: 100 });
         const allResults = allResultsRes.data.results || [];
-        
+
         let sumPct = 0;
         allResults.forEach(r => { sumPct += r.percentage || 0; });
         const avgPct = allResults.length > 0 ? Math.round(sumPct / allResults.length) : 0;
 
-        // 2. Get accepted coding submissions count
         const problemsRes = await codingService.getProblems({ limit: 100 });
         const problems = problemsRes.data.problems || [];
         const solvedCount = problems.filter(p => p.isSolved).length;
 
-        // 3. Get my rank on Leaderboard
         const leaderboardRes = await leaderboardService.getLeaderboard({ limit: 1 });
         const rank = leaderboardRes.data.myRank || '--';
         setMyRank(rank);
 
-        // 4. Get active tests
         const testsRes = await testService.getTests({ limit: 3 });
         setTests(Array.isArray(testsRes.data) ? testsRes.data.slice(0, 3) : []);
 
@@ -84,7 +79,6 @@ const Dashboard = () => {
 
   if (loading) return <Loader />;
 
-  // Prepare line chart data (reverse to chronological order)
   const lineChartData = recentResults
     .slice()
     .reverse()
@@ -93,7 +87,6 @@ const Dashboard = () => {
       score: r.percentage,
     }));
 
-  // Prepare radar/pie chart data for categories
   const categoryChartData = [
     { name: 'Aptitude Tests', count: stats.testsCompleted },
     { name: 'Coding Problems', count: stats.problemsSolved },
@@ -101,27 +94,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Welcome Banner */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-xl shadow-blue-500/10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full translate-x-10 -translate-y-10 blur-xl" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Welcome back, {user?.name}! 👋
-            </h1>
-            <p className="text-blue-100/90 text-sm md:text-base mt-2 max-w-xl leading-relaxed">
-              "Continuous improvement is better than delayed perfection." Get ready for your placement preparation by attempting a test or practicing coding today!
-            </p>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 self-start md:self-auto">
-            <Flame className="w-6 h-6 text-amber-400 animate-pulse fill-amber-400" />
-            <div>
-              <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Daily Streak</p>
-              <p className="text-xl font-black">{stats.streak} Days</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -163,10 +135,7 @@ const Dashboard = () => {
               <Brain className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white mb-1">Aptitude Tests</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Quantitative, Logical, and Verbal reasoning tests to build analytical skills.
-              </p>
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4">Aptitude Tests</h3>
               <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-600 p-0 font-bold group">
                 Attempt Tests <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>
@@ -181,10 +150,7 @@ const Dashboard = () => {
               <Terminal className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white mb-1">Technical MCQs</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Core engineering concepts: DSA, DBMS, Operating Systems, OOP, Networks.
-              </p>
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4">Technical MCQs</h3>
               <Button variant="ghost" size="sm" className="text-indigo-500 hover:text-indigo-600 p-0 font-bold group">
                 Attempt MCQs <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>
@@ -199,10 +165,7 @@ const Dashboard = () => {
               <Code2 className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white mb-1">Coding Sandbox</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Solve coding challenges in C, C++, Java, Python, and Javascript.
-              </p>
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4">Coding Sandbox</h3>
               <Button variant="ghost" size="sm" className="text-emerald-500 hover:text-emerald-600 p-0 font-bold group">
                 Practice Code <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>
@@ -217,10 +180,7 @@ const Dashboard = () => {
               <Mic className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white mb-1">AI Mock Interview</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Mock technical & HR interview bot powered by speech-to-text.
-              </p>
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4">AI Mock Interview</h3>
               <Button variant="ghost" size="sm" className="text-purple-500 hover:text-purple-600 p-0 font-bold group">
                 Start Interview <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>
@@ -355,3 +315,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

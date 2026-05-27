@@ -1,15 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-/**
- * StatsCard — A premium stats card with icon, value, label, and optional trend.
- * @param {string} title - Stat label
- * @param {string|number} value - Main value
- * @param {ReactNode} icon - Lucide icon component
- * @param {string} color - Tailwind color key (indigo, purple, emerald, amber, rose, cyan)
- * @param {number} trend - Percentage change (positive/negative)
- * @param {string} trendLabel - e.g. "vs last month"
- */
 const colorMap = {
   indigo: {
     bg: 'bg-indigo-50 dark:bg-indigo-500/10',
@@ -87,3 +78,4 @@ const StatsCard = ({ title, value, icon: Icon, color = 'indigo', trend, trendLab
 };
 
 export default StatsCard;
+

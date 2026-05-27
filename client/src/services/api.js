@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor — attach token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,10 +20,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401 & unpack data envelope
 api.interceptors.response.use(
   (response) => {
-    // If the response body has the backend's standard success wrapper, extract the data field
     if (response.data && response.data.success === true && response.data.data !== undefined) {
       response.data = response.data.data;
     }
@@ -42,3 +39,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

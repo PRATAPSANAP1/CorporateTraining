@@ -56,9 +56,9 @@ const AdminDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white font-black">Admin Dashboard</h1>
-          
+
         </div>
-        
+
         {/* Quick action controls */}
         <div className="flex flex-wrap items-center gap-3">
           <Button
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
 
       {/* Grid columns for listings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Recent Submissions Feed */}
         <Card hover={false} className="flex flex-col gap-4">
           <div className="flex justify-between items-center pb-3 border-b border-slate-50 dark:border-slate-800">
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
                       <p className="text-[10px] text-slate-400 mt-0.5">{sub.test?.name || 'Deleted Exam'}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <Badge variant={sub.passed ? 'success' : 'danger'} size="sm">
                       {sub.passed ? 'Passed' : 'Failed'}
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
                       <p className="text-[10px] text-slate-400 mt-0.5">{stud.email}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right font-medium text-[10px] text-slate-400">
                     <p className="font-bold text-slate-600 dark:text-slate-300">{stud.branch || 'CSE'}</p>
                     <p className="mt-0.5">{stud.year || '4th Year'}</p>
@@ -237,3 +237,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

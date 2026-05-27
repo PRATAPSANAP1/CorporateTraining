@@ -64,3 +64,4 @@ const CategoryChart = ({ data = [] }) => {
 };
 
 export default CategoryChart;
+

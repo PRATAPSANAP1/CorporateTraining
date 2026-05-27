@@ -18,12 +18,10 @@ const ManageTests = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [difficulty, setDifficulty] = useState('');
 
-  // Dialogs
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetId, setTargetId] = useState(null);
 
@@ -36,7 +34,7 @@ const ManageTests = () => {
 
       const res = await adminService.getTests(params);
       let list = res.data || [];
-      
+
       if (search) {
         list = list.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
       }
@@ -110,9 +108,6 @@ const ManageTests = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white">Active Placement Tests</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Create, modify, or toggle availability of timed examinations for students.
-          </p>
         </div>
 
         <Button
@@ -260,3 +255,4 @@ const ManageTests = () => {
 };
 
 export default ManageTests;
+

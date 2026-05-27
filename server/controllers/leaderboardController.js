@@ -6,11 +6,6 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get global leaderboard (paginated & searchable)
- * @route   GET /api/leaderboard
- * @access  Private
- */
 const getLeaderboard = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -18,7 +13,6 @@ const getLeaderboard = async (req, res) => {
     const skip = (page - 1) * limit;
     const search = req.query.search || '';
 
-    // Search filter on populated User name
     let matchFilter = {};
     if (search) {
       const matchingUsers = await User.find({
@@ -36,7 +30,6 @@ const getLeaderboard = async (req, res) => {
 
     const total = await Leaderboard.countDocuments(matchFilter);
 
-    // Get current user's rank
     const myLeaderboard = await Leaderboard.findOne({ user: req.user._id });
     const myRank = myLeaderboard ? myLeaderboard.rank : null;
 
@@ -56,13 +49,8 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
-/**
- * @desc    Recalculate leaderboard scores & ranks for a user
- * @param   {string} userId - User ID to update
- */
 const updateLeaderboard = async (userId) => {
   try {
-    // 1. Fetch user's test results
     const results = await Result.find({ user: userId }).populate({
       path: 'test',
       populate: { path: 'category' }
@@ -84,8 +72,6 @@ const updateLeaderboard = async (userId) => {
       }
     });
 
-    // 2. Fetch user's accepted coding submissions
-    // Get unique problems solved
     const uniqueSolvedProblems = await CodingSubmission.find({
       user: userId,
       status: 'accepted'
@@ -93,7 +79,6 @@ const updateLeaderboard = async (userId) => {
 
     const codingProblemsSolved = uniqueSolvedProblems.length;
 
-    // Sum points of these unique problems
     let codingScore = 0;
     if (codingProblemsSolved > 0) {
       const problems = await CodingProblem.find({ _id: { $in: uniqueSolvedProblems } });
@@ -104,7 +89,6 @@ const updateLeaderboard = async (userId) => {
 
     const totalScore = aptitudeScore + technicalScore + codingScore;
 
-    // 3. Update or create Leaderboard entry for this user
     await Leaderboard.findOneAndUpdate(
       { user: userId },
       {
@@ -119,10 +103,8 @@ const updateLeaderboard = async (userId) => {
       { upsert: true, new: true }
     );
 
-    // 4. Recalculate ranks of ALL users
     const allLeaderboards = await Leaderboard.find({}).sort({ totalScore: -1, updatedAt: 1 });
-    
-    // Create bulk operations to update ranks
+
     const bulkOps = allLeaderboards.map((entry, index) => ({
       updateOne: {
         filter: { _id: entry._id },
@@ -144,3 +126,4 @@ module.exports = {
   getLeaderboard,
   updateLeaderboard
 };
+

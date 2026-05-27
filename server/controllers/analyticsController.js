@@ -7,11 +7,6 @@ const Leaderboard = require('../models/Leaderboard');
 const Category = require('../models/Category');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-/**
- * @desc    Get top-level dashboard statistics (Admin only)
- * @route   GET /api/analytics/dashboard
- * @access  Private/Admin
- */
 const getDashboardStats = async (req, res) => {
   try {
     const totalStudents = await User.countDocuments({ role: 'student' });
@@ -19,7 +14,6 @@ const getDashboardStats = async (req, res) => {
     const totalQuestions = await Question.countDocuments({ isActive: true });
     const totalCodingProblems = await CodingProblem.countDocuments({ isActive: true });
 
-    // Recent registrations (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const recentRegistrations = await User.countDocuments({
@@ -27,20 +21,17 @@ const getDashboardStats = async (req, res) => {
       createdAt: { $gte: sevenDaysAgo }
     });
 
-    // Tests taken today
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const testsTakenToday = await Result.countDocuments({
       submittedAt: { $gte: startOfToday }
     });
 
-    // Recent 5 registered students
     const recentStudents = await User.find({ role: 'student' })
       .select('name email branch year createdAt')
       .sort({ createdAt: -1 })
       .limit(5);
 
-    // Recent 5 test submissions
     const recentSubmissions = await Result.find({})
       .populate('user', 'name')
       .populate('test', 'name')
@@ -65,14 +56,8 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student performance analytics (Admin only)
- * @route   GET /api/analytics/students
- * @access  Private/Admin
- */
 const getStudentAnalytics = async (req, res) => {
   try {
-    // 1. Performance distribution (Score ranges from Leaderboard)
     const scoreRanges = await Leaderboard.aggregate([
       {
         $bucket: {
@@ -94,11 +79,10 @@ const getStudentAnalytics = async (req, res) => {
       else if (range._id === 500) name = '500-1000';
       else if (range._id === 1000) name = '1000-5000';
       else name = '5000+';
-      
+
       return { name, count: range.count };
     });
 
-    // 2. Average scores by category (Aptitude vs Technical)
     const avgCategoryScores = await Result.aggregate([
       {
         $lookup: {
@@ -134,7 +118,6 @@ const getStudentAnalytics = async (req, res) => {
       }
     ]);
 
-    // 3. Top performers (top 5 users)
     const topPerformers = await Leaderboard.find({})
       .populate('user', 'name college branch year')
       .sort({ totalScore: -1 })
@@ -151,14 +134,8 @@ const getStudentAnalytics = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get test performance analytics (Admin only)
- * @route   GET /api/analytics/tests
- * @access  Private/Admin
- */
 const getTestAnalytics = async (req, res) => {
   try {
-    // 1. Completion rates and average scores per test
     const testPerformance = await Result.aggregate([
       {
         $group: {
@@ -195,7 +172,6 @@ const getTestAnalytics = async (req, res) => {
       { $sort: { totalSubmissions: -1 } }
     ]);
 
-    // 2. Tests count by difficulty
     const testDifficultyCount = await Test.aggregate([
       {
         $group: {
@@ -215,14 +191,8 @@ const getTestAnalytics = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get category-wise questions and tests distributions (Admin only)
- * @route   GET /api/analytics/categories
- * @access  Private/Admin
- */
 const getCategoryAnalytics = async (req, res) => {
   try {
-    // 1. Questions per category
     const questionsPerCategory = await Question.aggregate([
       { $match: { isActive: true } },
       {
@@ -249,7 +219,6 @@ const getCategoryAnalytics = async (req, res) => {
       }
     ]);
 
-    // 2. Tests per category
     const testsPerCategory = await Test.aggregate([
       { $match: { isActive: true } },
       {
@@ -292,3 +261,4 @@ module.exports = {
   getTestAnalytics,
   getCategoryAnalytics
 };
+

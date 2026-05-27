@@ -61,3 +61,4 @@ const ProgressChart = ({ data = [] }) => {
 };
 
 export default ProgressChart;
+

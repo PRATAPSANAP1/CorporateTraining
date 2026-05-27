@@ -12,9 +12,8 @@ if (config.openaiApiKey) {
   }
 }
 
-// Pre-defined question banks for mock fallback
 const HR_QUESTIONS = [
-  "Hello! Thank you for joining us today. To start off, could you tell me a little about yourself and why you're interested in the OITSTACK Preparation Portal?",
+  "Hello! Thank you for joining us today. To start off, could you tell me a little about yourself and why you're interested in the OIT_STACK Preparation Portal?",
   "That sounds interesting! What would you say is your greatest strength, and how do you handle high-pressure situations or tight deadlines?",
   "Great. Can you describe a time when you had a conflict within a team project and how you went about resolving it?",
   "Excellent. Where do you see yourself in five years, and what career goals are you aiming to achieve next?",
@@ -29,11 +28,6 @@ const TECH_QUESTIONS = [
   "Excellent response. That covers the technical questions. Please click 'End Interview' to see your comprehensive analysis."
 ];
 
-/**
- * @desc    Start an interview session, returning the first question
- * @route   POST /api/interview/start
- * @access  Private
- */
 const startInterview = async (req, res) => {
   try {
     const { type } = req.body; // 'hr' or 'technical'
@@ -56,11 +50,6 @@ const startInterview = async (req, res) => {
   }
 };
 
-/**
- * @desc    Submit candidate answer, get AI feedback and next question
- * @route   POST /api/interview/answer
- * @access  Private
- */
 const sendAnswer = async (req, res) => {
   try {
     const { type, history, answer } = req.body;
@@ -69,10 +58,8 @@ const sendAnswer = async (req, res) => {
       return errorResponse(res, 400, 'Missing type, history, or answer in request body');
     }
 
-    // Append user's answer to the conversation history
     const updatedHistory = [...history, { role: 'user', content: answer }];
 
-    // 1. If OpenAI API Key is configured, use GPT
     if (openai) {
       try {
         const systemPrompt = type === 'hr'
@@ -103,10 +90,9 @@ const sendAnswer = async (req, res) => {
       }
     }
 
-    // 2. Mock Fallback Interview Flow (if OpenAI is not configured or failed)
     const userAnswersCount = updatedHistory.filter(msg => msg.role === 'user').length;
     const questionsList = type === 'hr' ? HR_QUESTIONS : TECH_QUESTIONS;
-    
+
     let nextQuestion = '';
     let feedback = '';
 
@@ -131,11 +117,6 @@ const sendAnswer = async (req, res) => {
   }
 };
 
-/**
- * @desc    End interview session, generate final performance report
- * @route   POST /api/interview/end
- * @access  Private
- */
 const endInterview = async (req, res) => {
   try {
     const { type, history, duration } = req.body;
@@ -154,7 +135,6 @@ const endInterview = async (req, res) => {
       "Showed a solid understanding of fundamental concepts."
     ];
 
-    // 1. Evaluate with OpenAI if configured
     if (openai && userMsgs.length > 0) {
       try {
         const evaluationPrompt = `You are a placement committee evaluator. Analyze the following mock interview transcript between an interviewer and a candidate.
@@ -162,9 +142,9 @@ const endInterview = async (req, res) => {
         Provide a JSON response containing:
         1. "scores": { "communication": number, "confidence": number, "technical": number, "overall": number }
         2. "feedback": string[] (An array of 3 bullet points with detailed improvement suggestions)
-        
+
         Format the response strictly as valid JSON.
-        
+
         Transcript:
         ${history.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n')}`;
 
@@ -176,9 +156,8 @@ const endInterview = async (req, res) => {
         });
 
         const rawJsonText = evaluation.choices[0].message.content.trim();
-        // Remove markdown formatting if GPT returned ```json ... ```
         const cleanJsonText = rawJsonText.replace(/^```json/, '').replace(/```$/, '').trim();
-        
+
         const evalResult = JSON.parse(cleanJsonText);
         if (evalResult.scores && evalResult.feedback) {
           scores = evalResult.scores;
@@ -189,12 +168,10 @@ const endInterview = async (req, res) => {
       }
     }
 
-    // 2. Adjust scores for technical/HR types slightly for realism
     if (type === 'hr') {
       scores.technical = scores.overall; // Set technical score equal to overall for HR interviews
     }
 
-    // 3. Save InterviewFeedback to database
     const feedbackRecord = await InterviewFeedback.create({
       user: req.user._id,
       type,
@@ -212,11 +189,6 @@ const endInterview = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's interview history
- * @route   GET /api/interview/history
- * @access  Private
- */
 const getInterviewHistory = async (req, res) => {
   try {
     const history = await InterviewFeedback.find({ user: req.user._id })
@@ -235,3 +207,4 @@ module.exports = {
   endInterview,
   getInterviewHistory
 };
+

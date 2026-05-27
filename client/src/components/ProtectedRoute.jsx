@@ -3,9 +3,6 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-/**
- * ProtectedRoute — Redirects to login if not authenticated.
- */
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const location = useLocation();
@@ -26,3 +23,4 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default ProtectedRoute;
+

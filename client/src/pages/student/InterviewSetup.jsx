@@ -8,18 +8,15 @@ import Button from '../../components/common/Button';
 const InterviewSetup = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState(null); // 'hr' or 'technical'
-  
-  // Microphone check states
+
   const [micPermission, setMicPermission] = useState('prompt'); // 'prompt', 'granted', 'denied'
   const [checkingMic, setCheckingMic] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
 
   useEffect(() => {
-    // Check if Web Speech API is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     setSpeechSupported(!!SpeechRecognition);
 
-    // Query microphone permission state
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'microphone' })
         .then((permissionStatus) => {
@@ -36,7 +33,6 @@ const InterviewSetup = () => {
     try {
       setCheckingMic(true);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted, close stream immediately
       stream.getTracks().forEach(track => track.stop());
       setMicPermission('granted');
       toast.success('Microphone permission granted successfully!');
@@ -54,19 +50,14 @@ const InterviewSetup = () => {
       toast.error('Please select an interview category to proceed.');
       return;
     }
-    
-    // We can proceed even if Web Speech is not fully granted, as the interface has a text input fallback!
+
     navigate(`/student/interview/session?type=${selectedType}`);
   };
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-12">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">AI-Powered Mock Placement Interview</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Perform a simulated placement interview round. You can speak your answers via microphone or type them out.
-        </p>
       </div>
 
       {/* Grid containing category selections */}
@@ -117,7 +108,7 @@ const InterviewSetup = () => {
 
       {/* Setup check and instructions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-        
+
         {/* Hardware Checks */}
         <Card hover={false} className="flex flex-col gap-4 justify-between">
           <div>
@@ -192,3 +183,4 @@ const InterviewSetup = () => {
 };
 
 export default InterviewSetup;
+

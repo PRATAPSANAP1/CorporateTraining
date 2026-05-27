@@ -21,3 +21,4 @@ router.delete('/:id', deleteUser);
 router.get('/:id/stats', getUserStats);
 
 module.exports = router;
+

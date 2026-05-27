@@ -1,13 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Question Schema
- *
- * Represents a single MCQ or true/false question.
- * Linked to a Category and optionally a Subcategory.
- * Supports configurable marks, negative marks, difficulty,
- * and per-question time limits.
- */
 const questionSchema = new mongoose.Schema(
   {
     question: {
@@ -82,11 +74,9 @@ const questionSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Compound index for efficient querying by category, difficulty, and active status.
- */
 questionSchema.index({ category: 1, difficulty: 1, isActive: 1 });
 
 const Question = mongoose.model('Question', questionSchema);
 
 module.exports = Question;
+

@@ -1,14 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
-/**
- * Modal — Reusable glassmorphism modal wrapper.
- * @param {boolean} isOpen
- * @param {Function} onClose
- * @param {string} title
- * @param {string} size - sm | md | lg | xl | full
- * @param {ReactNode} children
- */
 const Modal = ({ isOpen, onClose, title, size = 'md', children }) => {
   if (!isOpen) return null;
 
@@ -52,3 +44,4 @@ const Modal = ({ isOpen, onClose, title, size = 'md', children }) => {
 };
 
 export default Modal;
+

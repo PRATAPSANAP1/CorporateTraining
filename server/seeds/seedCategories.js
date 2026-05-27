@@ -113,11 +113,10 @@ const seedCategories = async () => {
     await mongoose.connect(config.mongoUri);
     console.log('Connected!');
 
-    // Clear existing categories and subcategories if requested (or just insert new ones)
     console.log('Checking existing categories...');
     const existingCount = await Category.countDocuments();
     if (existingCount > 0) {
-      console.log(`ℹ️ Database already has ${existingCount} categories. Clearing them to reseed fresh...`);
+      console.log(`Database already has ${existingCount} categories. Clearing them to reseed fresh...`);
       await Category.deleteMany({});
       await Subcategory.deleteMany({});
       console.log('Cleared existing categories and subcategories.');
@@ -131,7 +130,7 @@ const seedCategories = async () => {
         icon: catData.icon,
         isActive: true
       });
-      console.log(`🎉 Created Category: ${category.name}`);
+      console.log(`Created Category: ${category.name}`);
 
       for (const subData of catData.subcategories) {
         const sub = await Subcategory.create({
@@ -148,9 +147,10 @@ const seedCategories = async () => {
     console.log('Database connection closed. Category seeding complete.');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding categories:', error.message);
+    console.error('Error seeding categories:', error.message);
     process.exit(1);
   }
 };
 
 seedCategories();
+

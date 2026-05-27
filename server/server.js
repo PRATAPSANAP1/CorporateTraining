@@ -7,7 +7,6 @@ const config = require('./config/env');
 const errorHandler = require('./middleware/errorHandler');
 const { generalLimiter } = require('./middleware/rateLimiter');
 
-// Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -19,10 +18,8 @@ const interviewRoutes = require('./routes/interviewRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 
-// Initialize Express app
 const app = express();
 
-// ─── Security Middleware ─────────────────────────────────────
 app.use(helmet());
 app.use(cors({
   origin: config.clientUrl,
@@ -33,11 +30,9 @@ app.use(cors({
 app.use(mongoSanitize()); // Prevent NoSQL injection
 app.use(generalLimiter);  // Rate limiting
 
-// ─── Body Parsing ────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ─── API Routes ──────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -49,19 +44,15 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// ─── Health Check ────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
 
 app.use('*', (req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-
 app.use(errorHandler);
-
 
 const startServer = async () => {
   try {
@@ -87,3 +78,4 @@ const startServer = async () => {
 startServer();
 
 module.exports = app;
+

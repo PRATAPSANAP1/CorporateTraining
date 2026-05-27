@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/authService';
 
-// Load user from token
 export const loadUser = createAsyncThunk('auth/loadUser', async (_, { rejectWithValue }) => {
   try {
     const response = await authService.getProfile();
@@ -12,7 +11,6 @@ export const loadUser = createAsyncThunk('auth/loadUser', async (_, { rejectWith
   }
 });
 
-// Login
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const response = await authService.login(credentials);
@@ -22,7 +20,6 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
   }
 });
 
-// Register
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const response = await authService.register(userData);
@@ -32,7 +29,6 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
   }
 });
 
-// Logout
 export const logout = createAsyncThunk('auth/logout', async () => {
   authService.logout();
 });
@@ -58,7 +54,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Load user
       .addCase(loadUser.pending, (state) => { state.isLoading = true; })
       .addCase(loadUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -71,7 +66,6 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
       })
-      // Login
       .addCase(login.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -84,7 +78,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Register
       .addCase(register.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -97,7 +90,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
@@ -110,3 +102,4 @@ const authSlice = createSlice({
 
 export const { clearError, setCredentials } = authSlice.actions;
 export default authSlice.reducer;
+

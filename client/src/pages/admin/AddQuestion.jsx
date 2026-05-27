@@ -18,7 +18,6 @@ const AddQuestion = () => {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
 
-  // Form Fields
   const [question, setQuestion] = useState('');
   const [type, setType] = useState('mcq');
   const [options, setOptions] = useState(['', '']);
@@ -31,7 +30,6 @@ const AddQuestion = () => {
   const [negativeMark, setNegativeMark] = useState(0);
   const [timeLimit, setTimeLimit] = useState(60);
 
-  // Load categories on mount
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -44,7 +42,6 @@ const AddQuestion = () => {
     loadCategories();
   }, []);
 
-  // Fetch subcategories when parent category changes
   useEffect(() => {
     if (!category) {
       setSubcategories([]);
@@ -61,7 +58,6 @@ const AddQuestion = () => {
     loadSubcategories();
   }, [category]);
 
-  // Load existing question in edit mode
   useEffect(() => {
     if (!isEdit) return;
 
@@ -70,7 +66,7 @@ const AddQuestion = () => {
         setLoading(true);
         const res = await adminService.getQuestion(id);
         const q = res.data;
-        
+
         setQuestion(q.question);
         setType(q.type || 'mcq');
         setOptions(q.options || ['', '']);
@@ -108,8 +104,7 @@ const AddQuestion = () => {
     }
     const nextOpts = options.filter((_, i) => i !== index);
     setOptions(nextOpts);
-    
-    // Adjust correct answer index if index deleted was correct, or shift it
+
     if (correctAnswer === index) {
       setCorrectAnswer(0);
     } else if (correctAnswer > index) {
@@ -146,7 +141,6 @@ const AddQuestion = () => {
       return;
     }
 
-    // Validate options
     const filteredOpts = options.map(o => o.trim());
     if (filteredOpts.some(o => !o)) {
       toast.error('All option text fields must be filled.');
@@ -199,19 +193,15 @@ const AddQuestion = () => {
         </Link>
       </div>
 
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">
           {isEdit ? 'Modify Question' : 'Add MCQ Question'}
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          {isEdit ? 'Edit existing question contents and correction details.' : 'Formulate a new question with multiple options and correction keys.'}
-        </p>
       </div>
 
       {/* Grid containing form and visual preview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
+
         {/* Form Panel */}
         <Card hover={false} className="lg:col-span-2 p-6">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -322,7 +312,7 @@ const AddQuestion = () => {
                       className="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700/80 cursor-pointer"
                       title="Set as correct answer"
                     />
-                    
+
                     <input
                       type="text"
                       value={opt}
@@ -387,12 +377,12 @@ const AddQuestion = () => {
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 mb-4">
               <Eye className="w-4 h-4" /> Live Visual Preview
             </div>
-            
+
             <div className="flex flex-col gap-5">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Marks: {marks} | Penalty: -{negativeMark}
               </div>
-              
+
               <div className="text-xs font-extrabold text-slate-800 dark:text-white leading-relaxed">
                 {question || 'How will the question description appear to students?'}
               </div>
@@ -431,3 +421,4 @@ const AddQuestion = () => {
 };
 
 export default AddQuestion;
+

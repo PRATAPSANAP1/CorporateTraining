@@ -1,7 +1,5 @@
-// ===== API & Environment Constants =====
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// ===== Difficulty Color Mapping =====
 export const DIFFICULTY_COLORS = {
   easy: {
     bg: 'bg-emerald-100 dark:bg-emerald-900/30',
@@ -26,7 +24,6 @@ export const DIFFICULTY_COLORS = {
   },
 };
 
-// ===== Supported Programming Languages =====
 export const LANGUAGES = [
   { id: 63, name: 'JavaScript', value: 'javascript', monacoLang: 'javascript' },
   { id: 71, name: 'Python', value: 'python', monacoLang: 'python' },
@@ -35,7 +32,6 @@ export const LANGUAGES = [
   { id: 50, name: 'C', value: 'c', monacoLang: 'c' },
 ];
 
-// ===== Test / Question Categories =====
 export const CATEGORIES = {
   aptitude: [
     { id: 'quantitative', name: 'Quantitative Aptitude', icon: 'Calculator' },
@@ -55,7 +51,6 @@ export const CATEGORIES = {
   ],
 };
 
-// ===== Coding Submission Statuses =====
 export const SUBMISSION_STATUS = {
   ACCEPTED: { label: 'Accepted', color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
   WRONG_ANSWER: { label: 'Wrong Answer', color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/30' },
@@ -65,7 +60,6 @@ export const SUBMISSION_STATUS = {
   PENDING: { label: 'Pending', color: 'text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
 };
 
-// ===== Navigation Links =====
 export const NAV_LINKS = {
   student: [
     { path: '/student/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
@@ -89,22 +83,20 @@ export const NAV_LINKS = {
   ],
 };
 
-// ===== Pagination Defaults =====
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
   DEFAULT_LIMIT: 10,
   LIMIT_OPTIONS: [10, 25, 50, 100],
 };
 
-// ===== Interview Types =====
 export const INTERVIEW_TYPES = [
   { id: 'technical', name: 'Technical Interview', icon: 'Code2', description: 'DSA, System Design, OOP concepts' },
   { id: 'hr', name: 'HR Interview', icon: 'Users', description: 'Behavioral, situational questions' },
   { id: 'aptitude', name: 'Aptitude Round', icon: 'Brain', description: 'Logical reasoning, quantitative' },
 ];
 
-// ===== Theme Constants =====
 export const THEMES = {
   LIGHT: 'light',
   DARK: 'dark',
 };
+

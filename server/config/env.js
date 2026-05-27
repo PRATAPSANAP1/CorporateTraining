@@ -1,10 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-/**
- * Centralized environment variable configuration
- * Validates required variables on startup
- */
 module.exports = {
   port: process.env.PORT || 5000,
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -22,3 +18,4 @@ module.exports = {
   },
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
 };
+

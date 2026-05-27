@@ -1,9 +1,7 @@
-/* ===== Tailwind Directives ===== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ===== CSS Custom Properties (Theme Colors) ===== */
 :root {
   --color-primary: #3B82F6;
   --color-primary-dark: #2563EB;
@@ -16,7 +14,6 @@
   --color-danger: #EF4444;
   --color-info: #06B6D4;
 
-  /* Light theme */
   --bg-primary: #FFFFFF;
   --bg-secondary: #F1F5F9;
   --bg-tertiary: #E2E8F0;
@@ -42,7 +39,6 @@
   --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
-/* ===== Base Styles ===== */
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased;
@@ -54,7 +50,6 @@
     @apply border-slate-200 dark:border-slate-700;
   }
 
-  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -73,16 +68,13 @@
     @apply bg-slate-400 dark:bg-slate-500;
   }
 
-  /* Firefox scrollbar */
   * {
     scrollbar-width: thin;
     scrollbar-color: #94a3b8 transparent;
   }
 }
 
-/* ===== Component Layer ===== */
 @layer components {
-  /* Glassmorphism Card */
   .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(16px);
@@ -98,7 +90,6 @@
     border: 1px solid var(--glass-border);
   }
 
-  /* Gradient Text */
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500;
   }
@@ -107,7 +98,6 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600;
   }
 
-  /* Gradient Backgrounds */
   .gradient-primary {
     @apply bg-gradient-to-r from-blue-500 to-indigo-600;
   }
@@ -128,7 +118,6 @@
     @apply bg-gradient-to-r from-amber-500 to-orange-600;
   }
 
-  /* Premium Card Style */
   .card-premium {
     @apply bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/60 dark:border-slate-700/60;
     @apply shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50;
@@ -140,14 +129,12 @@
     transform: translateY(-2px);
   }
 
-  /* Sidebar Active Link */
   .sidebar-link-active {
     @apply bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20;
     @apply text-blue-600 dark:text-blue-400;
     border-right: 3px solid #3B82F6;
   }
 
-  /* Loading Skeleton */
   .skeleton {
     @apply bg-slate-200 dark:bg-slate-700 rounded animate-pulse;
   }
@@ -168,13 +155,11 @@
     @apply h-48 skeleton rounded-2xl;
   }
 
-  /* Input Focus Ring */
   .input-focus-ring {
     @apply focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:ring-blue-400/30 dark:focus:border-blue-400;
     @apply transition-all duration-200;
   }
 
-  /* Button base styles */
   .btn-primary {
     @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl;
     @apply shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98];
@@ -186,9 +171,7 @@
   }
 }
 
-/* ===== Utility Layer ===== */
 @layer utilities {
-  /* Hide scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -197,7 +180,6 @@
     display: none;
   }
 
-  /* Glow effects */
   .glow-blue {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
   }
@@ -206,7 +188,6 @@
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
   }
 
-  /* Text shadow */
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -216,7 +197,6 @@
   }
 }
 
-/* ===== Keyframe Animations ===== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -277,7 +257,6 @@
   50% { transform: translateY(-10px); }
 }
 
-/* Animation utility classes */
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -320,7 +299,6 @@
   animation: shimmer 1.5s infinite;
 }
 
-/* Staggered animation delays for lists */
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.1s; }
 .stagger-3 { animation-delay: 0.15s; }
@@ -330,12 +308,10 @@
 .stagger-7 { animation-delay: 0.35s; }
 .stagger-8 { animation-delay: 0.4s; }
 
-/* Page transition container */
 .page-transition {
   animation: fadeInUp 0.4s ease-out;
 }
 
-/* Gradient border effect */
 .gradient-border {
   position: relative;
   border: none;
@@ -353,3 +329,4 @@
   mask-composite: exclude;
   pointer-events: none;
 }
+

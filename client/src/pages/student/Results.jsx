@@ -15,8 +15,7 @@ const Results = () => {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
-  
-  // Stats
+
   const [stats, setStats] = useState({ totalTaken: 0, averageScore: 0, highestScore: 0 });
   const [categoryType, setCategoryType] = useState('');
 
@@ -32,7 +31,6 @@ const Results = () => {
         const res = await resultService.getMyResults(params);
         let list = res.data.results || [];
 
-        // Apply local categoryType filtering if selected
         if (categoryType) {
           list = list.filter(r => r.test?.category?.type === categoryType);
         }
@@ -43,10 +41,9 @@ const Results = () => {
           totalPages: res.data.pagination.pages
         });
 
-        // Load all results to calculate statistics
         const allRes = await resultService.getMyResults({ limit: 100 });
         const allList = allRes.data.results || [];
-        
+
         let sumPct = 0;
         let highPct = 0;
         allList.forEach(r => {
@@ -74,12 +71,8 @@ const Results = () => {
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto pb-12">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Your Examination Reports</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Review details, correct answers, and AI feedback from your previously attempted preparation sessions.
-        </p>
       </div>
 
       {/* Stats Cards Banner */}
@@ -235,3 +228,4 @@ const Results = () => {
 };
 
 export default Results;
+

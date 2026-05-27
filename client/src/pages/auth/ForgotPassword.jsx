@@ -68,7 +68,7 @@ const ForgotPassword = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. pratap@oitstack.com"
+              placeholder="e.g. pratap@oit_stack.com"
               icon={Mail}
               className="dark"
             />
@@ -97,3 +97,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+
