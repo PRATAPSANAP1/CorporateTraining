@@ -9,13 +9,7 @@ const seedAdmin = async () => {
     await mongoose.connect(config.mongoUri);
     console.log('Database connected successfully.');
 
-    const adminExists = await User.findOne({ role: 'admin' });
-    if (adminExists) {
-      console.log(`Admin account already exists: ${adminExists.email}`);
-      process.exit(0);
-    }
-
-    const admin = new User({
+    const adminData = {
       name: 'OIT_STACK Admin',
       email: 'admin@oitstack.com',
       password: 'Admin@123',
@@ -24,16 +18,31 @@ const seedAdmin = async () => {
       branch: 'Office of Placements',
       year: 'N/A',
       phone: '9999999999'
-    });
+    };
+
+    let admin = await User.findOne({ role: 'admin' });
+    
+    if (admin) {
+      console.log(`Admin account found. Updating email to: ${adminData.email}`);
+      admin.email = adminData.email;
+      // We don't update password to avoid overwriting if they changed it, 
+      // but if we want to ensure it's Admin@123 we could. Let's just update the email.
+    } else {
+      console.log('No admin found. Creating new admin account...');
+      admin = new User(adminData);
+    }
 
     await admin.save();
-    console.log(' Default Admin account created successfully!');
+    console.log('Admin account setup successfully!');
     console.log('Credentials:');
-    console.log('  Email:    admin@oitstack.com');
-    console.log('  Password: Admin@123');
+    console.log('Email:admin@oitstack.com');
+    console.log('Password: Admin@123');
 
-    await Leaderboard.create({ user: admin._id });
-    console.log('Leaderboard entry created for Admin.');
+    const leaderboardExists = await Leaderboard.findOne({ user: admin._id });
+    if (!leaderboardExists) {
+      await Leaderboard.create({ user: admin._id });
+      console.log('Leaderboard entry created for Admin.');
+    }
 
     mongoose.connection.close();
     console.log('Database connection closed. Seed complete.');
