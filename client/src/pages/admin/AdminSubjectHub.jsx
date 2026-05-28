@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ManageTests from './ManageTests';
 import ManageQuestions from './ManageQuestions';
-import { Brain, Calculator, AlignLeft, Shapes, Terminal, BookOpen } from 'lucide-react';
+import { Brain, Calculator, AlignLeft, Shapes, Terminal, BookOpen, Mic } from 'lucide-react';
 
 const subjectMap = {
   'math': { label: 'Math', icon: Calculator, defaultCategory: 'Quantitative Aptitude' },
