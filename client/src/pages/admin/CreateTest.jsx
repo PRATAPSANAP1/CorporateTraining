@@ -155,6 +155,7 @@ const CreateTest = () => {
       return { ...s, selectedQuestions: selected, count: selected.length };
     }));
   };
+  const handleCountChange = (sectionId, value) => {
     const num = Math.max(1, parseInt(value) || 1);
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, count: num } : s));
   };
