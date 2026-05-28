@@ -8,8 +8,9 @@ import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
+import Modal from '../../components/common/Modal';
 
-const newSection = () => ({ id: Date.now(), category: '', count: 10, pool: [], loadingPool: false, expanded: true });
+const newSection = () => ({ id: Date.now(), category: '', mode: 'automatic', count: 10, selectedQuestions: [], pool: [], loadingPool: false, expanded: true });
 
 const CreateTest = () => {
   const { id } = useParams();
@@ -32,8 +33,11 @@ const CreateTest = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [sections, setSections] = useState([newSection()]);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [currentSectionId, setCurrentSectionId] = useState(null);
 
   const totalSelected = sections.reduce((sum, s) => {
+    if (s.mode === 'manual') return sum + s.selectedQuestions.length;
     const available = s.pool.length;
     return sum + Math.min(s.count || 0, available);
   }, 0);
@@ -99,18 +103,21 @@ const CreateTest = () => {
         if (test.startDate) setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
         if (test.endDate) setEndDate(new Date(test.endDate).toISOString().slice(0, 16));
 
-        // Group by category, count per category
+        // Group by category, IDs
         const questions = test.questions || [];
         const catMap = {};
         questions.forEach(q => {
           const catId = q.category?._id || q.category || 'unknown';
-          catMap[catId] = (catMap[catId] || 0) + 1;
+          if (!catMap[catId]) catMap[catId] = [];
+          catMap[catId].push(q._id || q);
         });
 
-        const builtSections = Object.entries(catMap).map(([catId, count]) => ({
+        const builtSections = Object.entries(catMap).map(([catId, qs]) => ({
           id: Date.now() + Math.random(),
           category: catId,
-          count,
+          mode: 'manual', // default to manual when editing to preserve exact questions
+          count: qs.length,
+          selectedQuestions: qs,
           pool: [],
           loadingPool: false,
           expanded: true,
@@ -135,7 +142,19 @@ const CreateTest = () => {
     if (categoryId) loadPoolForSection(sectionId, categoryId);
   };
 
-  const handleCountChange = (sectionId, value) => {
+  const handleSectionModeChange = (sectionId, mode) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, mode } : s));
+  };
+
+  const handleToggleQuestion = (sectionId, questionId) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const selected = s.selectedQuestions.includes(questionId)
+        ? s.selectedQuestions.filter(id => id !== questionId)
+        : [...s.selectedQuestions, questionId];
+      return { ...s, selectedQuestions: selected, count: selected.length };
+    }));
+  };
     const num = Math.max(1, parseInt(value) || 1);
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, count: num } : s));
   };
@@ -164,17 +183,24 @@ const CreateTest = () => {
     const sectionsWithCat = sections.filter(s => s.category && s.pool.length > 0);
     if (sectionsWithCat.length === 0) { toast.error('Please select a category with available questions.'); return; }
 
-    // Validate counts
+    // Validate counts and manual selections
     for (const s of sectionsWithCat) {
-      if (s.count > s.pool.length) {
+      if (s.mode === 'automatic' && s.count > s.pool.length) {
         const catName = categories.find(c => c._id === s.category)?.name || 'section';
         toast.error(`${catName}: only ${s.pool.length} questions available, but ${s.count} requested.`);
         return;
       }
+      if (s.mode === 'manual' && s.selectedQuestions.length === 0) {
+        const catName = categories.find(c => c._id === s.category)?.name || 'section';
+        toast.error(`${catName}: Manual mode is selected but no questions were chosen.`);
+        return;
+      }
     }
 
-    // Auto-select questions per section
-    const allQuestions = sectionsWithCat.flatMap(s => autoSelectQuestions(s.pool, s.count));
+    // Process questions per section based on mode
+    const allQuestions = sectionsWithCat.flatMap(s => 
+      s.mode === 'manual' ? s.selectedQuestions : autoSelectQuestions(s.pool, s.count)
+    );
     const primaryCategory = sectionsWithCat[0]?.category || null;
 
     const payload = {
@@ -298,51 +324,104 @@ const CreateTest = () => {
                           onChange={e => handleSectionCategoryChange(section.id, e.target.value)}
                         />
 
-                        {/* Count input */}
+                        {/* Selection Mode */}
                         <div className="flex flex-col gap-1.5">
                           <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                            No. of Questions to Pick
+                            Selection Mode
                           </label>
-                          <div className="relative">
-                            <Hash className="absolute left-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                              type="number"
-                              min={1}
-                              max={available || 999}
-                              value={section.count}
-                              onChange={e => handleCountChange(section.id, e.target.value)}
-                              disabled={!section.category}
-                              className={`w-full pl-9 pr-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all focus:outline-none ${
-                                countExceeds
-                                  ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400'
-                                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-indigo-500'
-                              } disabled:opacity-40 disabled:cursor-not-allowed`}
-                            />
-                          </div>
-                          {section.loadingPool && (
-                            <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <Loader2 className="w-3 h-3 animate-spin" /> Loading questions...
-                            </p>
-                          )}
-                          {!section.loadingPool && available > 0 && (
-                            <p className={`text-[10px] font-semibold ${countExceeds ? 'text-rose-500' : 'text-emerald-500'}`}>
-                              {countExceeds
-                                ? `Only ${available} questions available`
-                                : `${available} questions available · ${Math.min(section.count, available)} will be randomly picked`}
-                            </p>
-                          )}
-                          {!section.loadingPool && section.category && available === 0 && (
-                            <p className="text-[10px] text-rose-500 font-semibold">No active questions in this category</p>
-                          )}
+                          <Select
+                            value={section.mode}
+                            options={[{ label: 'Automatic (Random)', value: 'automatic' }, { label: 'Manual Selection', value: 'manual' }]}
+                            onChange={e => handleSectionModeChange(section.id, e.target.value)}
+                            disabled={!section.category}
+                          />
                         </div>
+
+                        {section.mode === 'automatic' ? (
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              No. of Questions to Pick
+                            </label>
+                            <div className="relative">
+                              <Hash className="absolute left-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                              <input
+                                type="number"
+                                min={1}
+                                max={available || 999}
+                                value={section.count}
+                                onChange={e => handleCountChange(section.id, e.target.value)}
+                                disabled={!section.category}
+                                className={`w-full pl-9 pr-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all focus:outline-none ${
+                                  countExceeds
+                                    ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400'
+                                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-indigo-500'
+                                } disabled:opacity-40 disabled:cursor-not-allowed`}
+                              />
+                            </div>
+                            {section.loadingPool && (
+                              <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                                <Loader2 className="w-3 h-3 animate-spin" /> Loading questions...
+                              </p>
+                            )}
+                            {!section.loadingPool && available > 0 && (
+                              <p className={`text-[10px] font-semibold ${countExceeds ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                {countExceeds
+                                  ? `Only ${available} questions available`
+                                  : `${available} questions available · ${Math.min(section.count, available)} will be randomly picked`}
+                              </p>
+                            )}
+                            {!section.loadingPool && section.category && available === 0 && (
+                              <p className="text-[10px] text-rose-500 font-semibold">No active questions in this category</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              Selected Questions
+                            </label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={!section.category || section.loadingPool}
+                              onClick={() => {
+                                setCurrentSectionId(section.id);
+                                setManualModalOpen(true);
+                              }}
+                              className="w-full justify-between"
+                            >
+                              <span>{section.selectedQuestions.length} Selected</span>
+                              <span className="text-xs text-indigo-500">Edit Selection</span>
+                            </Button>
+                            {section.loadingPool && (
+                              <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                                <Loader2 className="w-3 h-3 animate-spin" /> Loading questions...
+                              </p>
+                            )}
+                            {!section.loadingPool && available > 0 && (
+                              <p className="text-[10px] font-semibold text-emerald-500">
+                                {available} questions available to choose from
+                              </p>
+                            )}
+                            {!section.loadingPool && section.category && available === 0 && (
+                              <p className="text-[10px] text-rose-500 font-semibold">No active questions in this category</p>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Auto-select info */}
-                      {available > 0 && (
+                      {section.mode === 'automatic' && available > 0 && (
                         <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2.5">
                           <Shuffle className="w-4 h-4 text-indigo-500 shrink-0" />
                           <p className="text-xs text-indigo-600 dark:text-indigo-400">
                             <span className="font-bold">{Math.min(section.count, available)} questions</span> will be randomly auto-selected from the pool of {available} on save.
+                          </p>
+                        </div>
+                      )}
+                      {section.mode === 'manual' && (
+                        <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                            <span className="font-bold">{section.selectedQuestions.length} specific questions</span> selected for this section.
                           </p>
                         </div>
                       )}
@@ -442,6 +521,44 @@ const CreateTest = () => {
         </div>
 
       </form>
+
+      {/* Manual Selection Modal */}
+      <Modal isOpen={manualModalOpen} onClose={() => setManualModalOpen(false)} title="Select Questions Manually">
+        {(() => {
+          const s = sections.find(sec => sec.id === currentSectionId);
+          if (!s) return null;
+          return (
+            <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-2">
+              <p className="text-sm text-slate-500">Select which questions to include in this section. ({s.selectedQuestions.length} selected)</p>
+              {s.pool.map(q => (
+                <div key={q._id} className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-indigo-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={s.selectedQuestions.includes(q._id)}
+                    onChange={() => handleToggleQuestion(s.id, q._id)}
+                    className="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-800 dark:text-white" dangerouslySetInnerHTML={{ __html: q.questionText }}></p>
+                    <div className="flex gap-2 mt-2">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase">
+                        {q.difficulty}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {s.pool.length === 0 && (
+                <p className="text-center text-sm text-slate-500 py-8">No questions available in this category.</p>
+              )}
+            </div>
+          );
+        })()}
+        <div className="mt-6 flex justify-end">
+          <Button type="button" onClick={() => setManualModalOpen(false)} variant="primary">Done</Button>
+        </div>
+      </Modal>
+
     </div>
   );
 };

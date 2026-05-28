@@ -132,14 +132,14 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="students" element={<ManageStudents />} />
-          <Route path="aptitude/:subject" element={<AdminSubjectHub group="aptitude" />} />
+          <Route path="aptitude" element={<AdminSubjectHub group="aptitude" />} />
           <Route path="technical/:subject" element={<AdminSubjectHub group="technical" />} />
           
-          <Route path="questions" element={<Navigate to="/admin/aptitude/math" replace />} />
+          <Route path="questions" element={<Navigate to="/admin/aptitude" replace />} />
           <Route path="questions/add" element={<AddQuestion />} />
           <Route path="questions/edit/:id" element={<AddQuestion />} />
           
-          <Route path="tests" element={<Navigate to="/admin/aptitude/math" replace />} />
+          <Route path="tests" element={<Navigate to="/admin/aptitude" replace />} />
           <Route path="tests/create" element={<CreateTest />} />
           <Route path="tests/edit/:id" element={<CreateTest />} />
           

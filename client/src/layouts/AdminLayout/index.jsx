@@ -14,13 +14,9 @@ const navStructure = [
   { label: 'Students', path: '/admin/students', icon: Users, single: true },
   {
     label: 'Aptitude',
+    path: '/admin/aptitude',
     icon: Brain,
-    color: 'text-blue-500',
-    children: [
-      { label: 'Math', path: '/admin/aptitude/math', icon: Calculator },
-      { label: 'Verbal', path: '/admin/aptitude/verbal', icon: AlignLeft },
-      { label: 'Non-Verbal', path: '/admin/aptitude/non-verbal', icon: Shapes },
-    ],
+    single: true,
   },
   {
     label: 'Technical',

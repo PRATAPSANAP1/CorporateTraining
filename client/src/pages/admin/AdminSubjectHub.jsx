@@ -16,11 +16,14 @@ const AdminSubjectHub = ({ group }) => {
   const { subject } = useParams();
   const [activeTab, setActiveTab] = useState('tests');
 
-  if (!subject || !subjectMap[subject]) {
+  if (group === 'technical' && (!subject || !subjectMap[subject])) {
     return <Navigate to="/admin/dashboard" replace />;
   }
 
-  const info = subjectMap[subject];
+  const info = group === 'aptitude' 
+    ? { label: 'Aptitude Hub', icon: Brain, defaultCategory: null } 
+    : subjectMap[subject];
+
   const Icon = info.icon;
 
   return (
@@ -31,7 +34,7 @@ const AdminSubjectHub = ({ group }) => {
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-            {group === 'aptitude' ? 'Aptitude' : 'Technical'} — {info.label}
+            {group === 'aptitude' ? 'Aptitude' : `Technical — ${info.label}`}
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">Manage tests and questions for this section.</p>
         </div>
