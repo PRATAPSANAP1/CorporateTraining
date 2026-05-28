@@ -108,47 +108,38 @@ const Login = () => {
 
       <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] p-4">
       <div className="w-full max-w-md">
-        {/* Role Toggle */}
-        <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
-          <button
-            type="button"
-            onClick={() => handleRoleSwitch('student')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              !isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-            }`}
-          >
-            <GraduationCap className="w-4 h-4" />
-            Student
-          </button>
-          <button
-            type="button"
-            onClick={() => handleRoleSwitch('admin')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            Admin
-          </button>
-        </div>
-
         {/* Card */}
         <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl border transition-all duration-300 p-8 ${
           isAdmin ? 'border-indigo-500/20 shadow-indigo-500/5' : 'border-slate-100 dark:border-slate-800'
         }`}>
-          {/* Admin badge */}
-          {isAdmin && (
-            <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2 mb-5">
-              <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
-              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-                Admin access only. Unauthorized login is prohibited.
-              </p>
-            </div>
-          )}
 
           <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-5">
             {isAdmin ? 'Admin Sign In' : 'Student Sign In'}
           </h2>
+
+          {/* Role Toggle inside card */}
+          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
+            <button
+              type="button"
+              onClick={() => handleRoleSwitch('student')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                !isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              Student
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRoleSwitch('admin')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              Admin
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
