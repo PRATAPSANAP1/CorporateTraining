@@ -34,8 +34,6 @@ const seedAdmin = async () => {
     await admin.save();
     console.log('Admin account setup successfully!');
     console.log('Credentials:');
-    console.log('Email:admin@oitstack.com');
-    console.log('Password: Admin@123');
 
     const leaderboardExists = await Leaderboard.findOne({ user: admin._id });
     if (!leaderboardExists) {
