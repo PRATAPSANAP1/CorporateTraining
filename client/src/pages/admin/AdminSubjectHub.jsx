@@ -65,10 +65,10 @@ const AdminSubjectHub = ({ group }) => {
 
       <div className="mt-2">
         {activeTab === 'tests' && (
-          <ManageTests defaultCategoryName={info.defaultCategory} hideHeader={true} />
+          <ManageTests defaultCategoryName={info.defaultCategory} hideHeader={true} group={group} />
         )}
         {activeTab === 'questions' && (
-          <ManageQuestions defaultCategoryName={info.defaultCategory} hideHeader={true} />
+          <ManageQuestions defaultCategoryName={info.defaultCategory} hideHeader={true} group={group} />
         )}
       </div>
     </div>

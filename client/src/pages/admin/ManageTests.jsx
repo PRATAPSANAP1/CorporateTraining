@@ -12,7 +12,9 @@ import EmptyState from '../../components/common/EmptyState';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import TableSkeleton from '../../components/skeletons/TableSkeleton';
 
-const ManageTests = ({ defaultCategoryName, hideHeader }) => {
+const APTITUDE_CATEGORIES = ['quantitative aptitude', 'verbal ability', 'logical reasoning'];
+
+const ManageTests = ({ defaultCategoryName, hideHeader, group }) => {
   const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -39,6 +41,14 @@ const ManageTests = ({ defaultCategoryName, hideHeader }) => {
         list = list.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
       }
 
+      if (group) {
+        list = list.filter(t => {
+          const catName = (t.category?.name || '').toLowerCase();
+          const isAptitude = APTITUDE_CATEGORIES.includes(catName);
+          return group === 'aptitude' ? isAptitude : !isAptitude;
+        });
+      }
+
       setTests(list);
     } catch (err) {
       console.error('Error fetching tests:', err.message);
@@ -52,10 +62,18 @@ const ManageTests = ({ defaultCategoryName, hideHeader }) => {
     const loadCategories = async () => {
       try {
         const res = await adminService.getCategories();
-        const opts = res.data.map(c => ({ label: c.name, value: c._id }));
+        let catData = res.data;
+        if (group) {
+          catData = catData.filter(c => {
+            const isAptitude = APTITUDE_CATEGORIES.includes((c.name || '').toLowerCase());
+            return group === 'aptitude' ? isAptitude : !isAptitude;
+          });
+        }
+        
+        const opts = catData.map(c => ({ label: c.name, value: c._id }));
         setCategories(opts);
         if (defaultCategoryName) {
-          const match = res.data.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
+          const match = catData.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
           if (match) setSelectedCategory(match._id);
         }
       } catch (err) {

@@ -13,7 +13,9 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import Modal from '../../components/common/Modal';
 import TableSkeleton from '../../components/skeletons/TableSkeleton';
 
-const ManageQuestions = ({ defaultCategoryName, hideHeader }) => {
+const APTITUDE_CATEGORIES = ['quantitative aptitude', 'verbal ability', 'logical reasoning'];
+
+const ManageQuestions = ({ defaultCategoryName, hideHeader, group }) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -41,7 +43,17 @@ const ManageQuestions = ({ defaultCategoryName, hideHeader }) => {
       if (search) params.search = search;
 
       const res = await adminService.getQuestions(params);
-      setQuestions(res.data.questions || []);
+      let list = res.data.questions || [];
+
+      if (group) {
+        list = list.filter(q => {
+          const catName = (q.category?.name || '').toLowerCase();
+          const isAptitude = APTITUDE_CATEGORIES.includes(catName);
+          return group === 'aptitude' ? isAptitude : !isAptitude;
+        });
+      }
+
+      setQuestions(list);
     } catch (err) {
       console.error('Error fetching questions:', err.message);
       toast.error('Failed to load questions pool');
@@ -54,10 +66,18 @@ const ManageQuestions = ({ defaultCategoryName, hideHeader }) => {
     const loadCategories = async () => {
       try {
         const res = await adminService.getCategories();
-        const opts = res.data.map(c => ({ label: c.name, value: c._id }));
+        let catData = res.data;
+        if (group) {
+          catData = catData.filter(c => {
+            const isAptitude = APTITUDE_CATEGORIES.includes((c.name || '').toLowerCase());
+            return group === 'aptitude' ? isAptitude : !isAptitude;
+          });
+        }
+        
+        const opts = catData.map(c => ({ label: c.name, value: c._id }));
         setCategories(opts);
         if (defaultCategoryName) {
-          const match = res.data.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
+          const match = catData.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
           if (match) setSelectedCategory(match._id);
         }
       } catch (err) {
