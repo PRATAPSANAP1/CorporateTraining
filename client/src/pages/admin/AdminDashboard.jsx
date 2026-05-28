@@ -93,55 +93,38 @@ const AdminDashboard = () => {
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatsCard
-          title="Total Registered Students"
-          value={stats.totalStudents}
-          icon={Users}
-          color="indigo"
-        />
-        <StatsCard
-          title="Active Placement Tests"
-          value={stats.totalTests}
-          icon={ClipboardList}
-          color="blue"
-        />
-        <StatsCard
-          title="MCQ Questions Pool"
-          value={stats.totalQuestions}
-          icon={FileQuestion}
-          color="purple"
-        />
-        <StatsCard
-          title="Coding Problems"
-          value={stats.totalCodingProblems}
-          icon={Code2}
-          color="emerald"
-        />
+        <div className="cursor-pointer" onClick={() => navigate('/admin/students')}>
+          <StatsCard title="Total Registered Students" value={stats.totalStudents} icon={Users} color="indigo" />
+        </div>
+        <div className="cursor-pointer" onClick={() => navigate('/admin/tests')}>
+          <StatsCard title="Active Placement Tests" value={stats.totalTests} icon={ClipboardList} color="blue" />
+        </div>
+        <div className="cursor-pointer" onClick={() => navigate('/admin/questions')}>
+          <StatsCard title="MCQ Questions Pool" value={stats.totalQuestions} icon={FileQuestion} color="purple" />
+        </div>
+        <div className="cursor-pointer" onClick={() => navigate('/admin/coding')}>
+          <StatsCard title="Coding Problems" value={stats.totalCodingProblems} icon={Code2} color="emerald" />
+        </div>
       </div>
 
       {/* Today Activity cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Card className="flex items-center gap-4 border-slate-100 dark:border-slate-800/80" hover={false}>
+        <Card className="flex items-center gap-4 border-slate-100 dark:border-slate-800/80 cursor-pointer" hover={true} onClick={() => navigate('/admin/students')}>
           <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <UserCheck className="w-6 h-6 animate-pulse" />
           </div>
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">New Students (Last 7 Days)</p>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white mt-1">
-              +{stats.recentRegistrations} Registered
-            </h3>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mt-1">+{stats.recentRegistrations} Registered</h3>
           </div>
         </Card>
-
-        <Card className="flex items-center gap-4 border-slate-100 dark:border-slate-800/80" hover={false}>
+        <Card className="flex items-center gap-4 border-slate-100 dark:border-slate-800/80 cursor-pointer" hover={true} onClick={() => navigate('/admin/results')}>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Activity className="w-6 h-6 animate-pulse" />
           </div>
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Test Submissions Today</p>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white mt-1">
-              {stats.testsTakenToday} Exam Submissions
-            </h3>
+            <h3 className="text-xl font-black text-slate-800 dark:text-white mt-1">{stats.testsTakenToday} Exam Submissions</h3>
           </div>
         </Card>
       </div>
