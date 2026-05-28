@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search, HelpCircle, FileDown, Trash2, Edit2, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -197,28 +198,52 @@ const ManageQuestions = ({ defaultCategoryName, hideHeader, group }) => {
         </div>
       )}
 
-      {hideHeader && (
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            icon={FileSpreadsheet}
-            onClick={() => setBulkOpen(true)}
-            className="font-bold text-xs"
-          >
-            Bulk Import JSON
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
-            onClick={() => navigate(`/admin/questions/add${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
-            className="font-bold text-xs"
-          >
-            Add Question
-          </Button>
-        </div>
-      )}
+      {hideHeader && document.getElementById('admin-hub-actions')
+        ? createPortal(
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={FileSpreadsheet}
+                onClick={() => setBulkOpen(true)}
+                className="font-bold text-xs"
+              >
+                Bulk Import JSON
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={PlusCircle}
+                onClick={() => navigate(`/admin/questions/add${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+                className="font-bold text-xs"
+              >
+                Add Question
+              </Button>
+            </>,
+            document.getElementById('admin-hub-actions')
+          )
+        : hideHeader && (
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={FileSpreadsheet}
+                onClick={() => setBulkOpen(true)}
+                className="font-bold text-xs"
+              >
+                Bulk Import JSON
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={PlusCircle}
+                onClick={() => navigate(`/admin/questions/add${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+                className="font-bold text-xs"
+              >
+                Add Question
+              </Button>
+            </div>
+          )}
 
       {/* Filters Card */}
       <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4" hover={false}>

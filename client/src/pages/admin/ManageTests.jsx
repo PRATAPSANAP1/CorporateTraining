@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search, ClipboardList, Clock, HelpCircle, ToggleLeft, ToggleRight, Trash2, Edit2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -145,20 +146,33 @@ const ManageTests = ({ defaultCategoryName, hideHeader, group }) => {
         </div>
       )}
 
-      {/* When hideHeader is true, we still need a Create Test button somewhere, perhaps inline with filters */}
-      {hideHeader && (
-        <div className="flex justify-end">
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
-            onClick={() => navigate(`/admin/tests/create${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
-            className="font-bold text-xs"
-          >
-            Create Test
-          </Button>
-        </div>
-      )}
+      {/* When hideHeader is true, we render the button into the AdminSubjectHub's portal if it exists */}
+      {hideHeader && document.getElementById('admin-hub-actions')
+        ? createPortal(
+            <Button
+              variant="primary"
+              size="sm"
+              icon={PlusCircle}
+              onClick={() => navigate(`/admin/tests/create${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+              className="font-bold text-xs"
+            >
+              Create Test
+            </Button>,
+            document.getElementById('admin-hub-actions')
+          )
+        : hideHeader && (
+            <div className="flex justify-end">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={PlusCircle}
+                onClick={() => navigate(`/admin/tests/create${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+                className="font-bold text-xs"
+              >
+                Create Test
+              </Button>
+            </div>
+          )}
 
       {/* Filters Card */}
       <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4" hover={false}>
