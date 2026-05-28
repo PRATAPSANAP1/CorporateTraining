@@ -86,17 +86,28 @@ const Login = () => {
   const ringClass = isAdmin ? 'focus:ring-indigo-500' : 'focus:ring-blue-500';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex items-center gap-3 justify-center mb-6">
-          <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-12 h-12 object-contain rounded-xl bg-white border border-slate-100 dark:border-slate-700 shadow-sm" />
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white leading-none">OIT_STACK</h1>
-            <span className="text-[10px] text-slate-500 font-medium">Placement Preparation Portal</span>
-          </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Navbar */}
+      <nav className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-6">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo.jpg" alt="OIT_STACK" className="w-7 h-7 object-contain rounded-lg border border-slate-100 dark:border-slate-700" />
+          <span className="font-bold text-slate-900 dark:text-white text-sm">OIT_STACK</span>
         </div>
+        <button
+          onClick={() => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          }}
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+      </nav>
 
+      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] p-4">
+      <div className="w-full max-w-md">
         {/* Role Toggle */}
         <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
           <button
@@ -223,6 +234,7 @@ const Login = () => {
             </p>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
