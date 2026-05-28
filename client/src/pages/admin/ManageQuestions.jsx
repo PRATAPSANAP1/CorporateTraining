@@ -22,8 +22,6 @@ const ManageQuestions = () => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [difficulty, setDifficulty] = useState('');
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
-
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetId, setTargetId] = useState(null);
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -35,8 +33,7 @@ const ManageQuestions = () => {
     try {
       setLoading(true);
       const params = {
-        page: pagination.page,
-        limit: 10,
+        limit: 500,
         includeInactive: 'true'
       };
       if (selectedCategory) params.category = selectedCategory;
@@ -45,10 +42,6 @@ const ManageQuestions = () => {
 
       const res = await adminService.getQuestions(params);
       setQuestions(res.data.questions || []);
-      setPagination({
-        page: res.data.pagination.page,
-        totalPages: res.data.pagination.pages
-      });
     } catch (err) {
       console.error('Error fetching questions:', err.message);
       toast.error('Failed to load questions pool');
@@ -72,7 +65,7 @@ const ManageQuestions = () => {
 
   useEffect(() => {
     fetchQuestionsList();
-  }, [selectedCategory, difficulty, search, pagination.page]);
+  }, [selectedCategory, difficulty, search]);
 
   const handleDeleteTrigger = (id) => {
     setTargetId(id);
@@ -151,6 +144,9 @@ const ManageQuestions = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white">Questions Repository</h1>
+          {questions.length > 0 && (
+            <p className="text-sm text-slate-400 mt-0.5">{questions.length} questions found</p>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -282,29 +278,6 @@ const ManageQuestions = () => {
             </table>
           </div>
 
-          {/* Simple pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-end gap-2 pr-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page === 1}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                className="text-xs py-1.5 px-3"
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page === pagination.totalPages}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                className="text-xs py-1.5 px-3"
-              >
-                Next
-              </Button>
-            </div>
-          )}
         </div>
       )}
 
