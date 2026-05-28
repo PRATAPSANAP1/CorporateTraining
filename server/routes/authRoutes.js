@@ -7,6 +7,9 @@ const {
   updateProfile,
   forgotPassword,
   resetPassword,
+  refreshAuthToken,
+  logout,
+  logoutAll
 } = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -46,6 +49,9 @@ router.post('/register', validate(registerValidation), register);
 router.post('/login', authLimiter, validate(loginValidation), login);
 router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
 router.post('/reset-password/:token', validate(resetPasswordValidation), resetPassword);
+router.post('/refresh', refreshAuthToken);
+router.post('/logout', logout);
+router.post('/logout-all', auth, logoutAll);
 
 router.get('/profile', auth, getProfile);
 router.put('/profile', auth, validate(profileValidation), updateProfile);

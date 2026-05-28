@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const config = require('./config/env');
-const errorHandler = require('./middleware/errorHandler');
+const errorHandler = require('./middleware/errorMiddleware');
 const { generalLimiter } = require('./middleware/rateLimiter');
 
 const authRoutes = require('./routes/authRoutes');
@@ -32,6 +33,7 @@ app.use(generalLimiter);  // Rate limiting
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

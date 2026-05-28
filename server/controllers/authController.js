@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 const { body } = require('express-validator');
 const User = require('../models/User');
+const Session = require('../models/Session');
 const Leaderboard = require('../models/Leaderboard');
-const generateToken = require('../utils/generateToken');
+const generateTokens = require('../utils/generateToken');
 const sendEmail = require('../utils/sendEmail');
 const config = require('../config/env');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
@@ -21,7 +22,17 @@ const register = async (req, res) => {
 
     await Leaderboard.create({ user: user._id });
 
-    const token = generateToken(user._id, user.role, user.activeSessionId);
+    const { accessToken, refreshToken } = generateTokens(user._id, user.role, user.activeSessionId);
+
+    // Save session
+    await Session.create({
+      user: user._id,
+      activeSessionId: user.activeSessionId,
+      deviceInfo: req.headers['user-agent'] || 'Unknown Device',
+      ipAddress: req.ip || 'Unknown IP',
+      refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
 
     const userResponse = {
       _id: user._id,
@@ -34,8 +45,16 @@ const register = async (req, res) => {
       profileImage: user.profileImage,
     };
 
+    // Send refreshToken in cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return successResponse(res, 201, 'User registered successfully', {
-      token,
+      token: accessToken,
       user: userResponse,
     });
   } catch (error) {
@@ -62,7 +81,19 @@ const login = async (req, res) => {
     user.activeSessionId = activeSessionId;
     await user.save();
 
-    const token = generateToken(user._id, user.role, user.activeSessionId);
+    const { accessToken, refreshToken } = generateTokens(user._id, user.role, user.activeSessionId);
+
+    // Disable all previous active sessions if only one active device is allowed
+    // await Session.updateMany({ user: user._id }, { isActive: false });
+
+    await Session.create({
+      user: user._id,
+      activeSessionId: user.activeSessionId,
+      deviceInfo: req.headers['user-agent'] || 'Unknown Device',
+      ipAddress: req.ip || 'Unknown IP',
+      refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
 
     const userResponse = {
       _id: user._id,
@@ -75,8 +106,15 @@ const login = async (req, res) => {
       profileImage: user.profileImage,
     };
 
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return successResponse(res, 200, 'Login successful', {
-      token,
+      token: accessToken,
       user: userResponse,
     });
   } catch (error) {
@@ -213,6 +251,66 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const refreshAuthToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+      return errorResponse(res, 401, 'No refresh token found. Please log in.');
+    }
+
+    const session = await Session.findOne({ refreshToken, isActive: true });
+    if (!session || session.expiresAt < Date.now()) {
+      return errorResponse(res, 401, 'Refresh token invalid or expired. Please log in again.');
+    }
+
+    const user = await User.findById(session.user);
+    if (!user) {
+      return errorResponse(res, 401, 'User no longer exists.');
+    }
+
+    // Verify session matches user's active session
+    if (user.activeSessionId !== session.activeSessionId) {
+      session.isActive = false;
+      await session.save();
+      return errorResponse(res, 401, 'Session terminated. Please log in again.');
+    }
+
+    const { accessToken } = generateTokens(user._id, user.role, user.activeSessionId);
+
+    return successResponse(res, 200, 'Token refreshed', { token: accessToken });
+  } catch (error) {
+    console.error('Refresh token error:', error.message);
+    return errorResponse(res, 500, 'Server error refreshing token');
+  }
+};
+
+const logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+    if (refreshToken) {
+      await Session.findOneAndUpdate({ refreshToken }, { isActive: false });
+    }
+    res.clearCookie('refreshToken');
+    return successResponse(res, 200, 'Logged out successfully');
+  } catch (error) {
+    console.error('Logout error:', error.message);
+    return errorResponse(res, 500, 'Server error logging out');
+  }
+};
+
+const logoutAll = async (req, res) => {
+  try {
+    await Session.updateMany({ user: req.user._id }, { isActive: false });
+    req.user.activeSessionId = null;
+    await req.user.save();
+    res.clearCookie('refreshToken');
+    return successResponse(res, 200, 'Logged out from all devices');
+  } catch (error) {
+    console.error('Logout all error:', error.message);
+    return errorResponse(res, 500, 'Server error logging out from all devices');
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -220,5 +318,9 @@ module.exports = {
   updateProfile,
   forgotPassword,
   resetPassword,
+  refreshAuthToken,
+  logout,
+  logoutAll
 };
+
 
