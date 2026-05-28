@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Save, ChevronLeft, Plus, Search, CheckSquare, Square, Loader2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, ChevronLeft, Plus, Loader2, Trash2, ChevronDown, ChevronUp, Shuffle, Hash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import adminService from '../../services/adminService';
 import Card from '../../components/common/Card';
@@ -9,8 +9,7 @@ import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 
-// One section = one category + its selected questions
-const newSection = () => ({ id: Date.now(), category: '', questions: [], pool: [], loadingPool: false, search: '', expanded: true });
+const newSection = () => ({ id: Date.now(), category: '', count: 10, pool: [], loadingPool: false, expanded: true });
 
 const CreateTest = () => {
   const { id } = useParams();
@@ -31,18 +30,19 @@ const CreateTest = () => {
   const [isActive, setIsActive] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
   const [sections, setSections] = useState([newSection()]);
 
-  const totalSelected = sections.reduce((sum, s) => sum + s.questions.length, 0);
+  const totalSelected = sections.reduce((sum, s) => {
+    const available = s.pool.length;
+    return sum + Math.min(s.count || 0, available);
+  }, 0);
 
   useEffect(() => {
     adminService.getCategories()
       .then(res => setCategories(res.data || []))
-      .catch(err => console.error('Error fetching categories:', err));
+      .catch(() => {});
   }, []);
 
-  // Load question pool for a section when its category changes
   const loadPoolForSection = useCallback(async (sectionId, categoryId) => {
     if (!categoryId) return;
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, loadingPool: true, pool: [] } : s));
@@ -55,7 +55,7 @@ const CreateTest = () => {
     }
   }, []);
 
-  // Edit mode: load existing test
+  // Edit mode
   useEffect(() => {
     if (!isEdit) return;
     const load = async () => {
@@ -75,28 +75,24 @@ const CreateTest = () => {
         if (test.startDate) setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
         if (test.endDate) setEndDate(new Date(test.endDate).toISOString().slice(0, 16));
 
-        // Group existing questions by category into sections
+        // Group by category, count per category
         const questions = test.questions || [];
         const catMap = {};
         questions.forEach(q => {
           const catId = q.category?._id || q.category || 'unknown';
-          if (!catMap[catId]) catMap[catId] = [];
-          catMap[catId].push(q._id || q);
+          catMap[catId] = (catMap[catId] || 0) + 1;
         });
 
-        const builtSections = Object.entries(catMap).map(([catId, qIds]) => ({
+        const builtSections = Object.entries(catMap).map(([catId, count]) => ({
           id: Date.now() + Math.random(),
           category: catId,
-          questions: qIds,
+          count,
           pool: [],
           loadingPool: false,
-          search: '',
           expanded: true,
         }));
 
         setSections(builtSections.length > 0 ? builtSections : [newSection()]);
-
-        // Load pools for each section
         builtSections.forEach(s => loadPoolForSection(s.id, s.category));
       } catch {
         toast.error('Failed to load test details.');
@@ -110,38 +106,20 @@ const CreateTest = () => {
 
   const handleSectionCategoryChange = (sectionId, categoryId) => {
     setSections(prev => prev.map(s =>
-      s.id === sectionId ? { ...s, category: categoryId, questions: [], pool: [], search: '' } : s
+      s.id === sectionId ? { ...s, category: categoryId, pool: [] } : s
     ));
     if (categoryId) loadPoolForSection(sectionId, categoryId);
   };
 
-  const handleToggleQuestion = (sectionId, qId) => {
-    setSections(prev => prev.map(s => {
-      if (s.id !== sectionId) return s;
-      const questions = s.questions.includes(qId)
-        ? s.questions.filter(i => i !== qId)
-        : [...s.questions, qId];
-      return { ...s, questions };
-    }));
+  const handleCountChange = (sectionId, value) => {
+    const num = Math.max(1, parseInt(value) || 1);
+    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, count: num } : s));
   };
 
-  const handleSelectAll = (sectionId) => {
-    setSections(prev => prev.map(s => {
-      if (s.id !== sectionId) return s;
-      const filtered = s.pool.filter(q => q.question.toLowerCase().includes(s.search.toLowerCase()));
-      const ids = filtered.map(q => q._id);
-      const merged = [...new Set([...s.questions, ...ids])];
-      return { ...s, questions: merged };
-    }));
-  };
-
-  const handleClearAll = (sectionId) => {
-    setSections(prev => prev.map(s => {
-      if (s.id !== sectionId) return s;
-      const filtered = s.pool.filter(q => q.question.toLowerCase().includes(s.search.toLowerCase()));
-      const ids = filtered.map(q => q._id);
-      return { ...s, questions: s.questions.filter(i => !ids.includes(i)) };
-    }));
+  // Auto-select `count` random questions from pool
+  const autoSelectQuestions = (pool, count) => {
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(count, pool.length)).map(q => q._id);
   };
 
   const addSection = () => setSections(prev => [...prev, newSection()]);
@@ -158,13 +136,22 @@ const CreateTest = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) { toast.error('Test name is required.'); return; }
-    if (totalSelected === 0) { toast.error('Please select at least one question.'); return; }
-    const hasEmptyCat = sections.some(s => s.questions.length > 0 && !s.category);
-    if (hasEmptyCat) { toast.error('Please assign a category to all sections with questions.'); return; }
 
-    const allQuestions = sections.flatMap(s => s.questions);
-    // Use first section's category as the primary category for backward compat
-    const primaryCategory = sections.find(s => s.category)?.category || null;
+    const sectionsWithCat = sections.filter(s => s.category && s.pool.length > 0);
+    if (sectionsWithCat.length === 0) { toast.error('Please select a category with available questions.'); return; }
+
+    // Validate counts
+    for (const s of sectionsWithCat) {
+      if (s.count > s.pool.length) {
+        const catName = categories.find(c => c._id === s.category)?.name || 'section';
+        toast.error(`${catName}: only ${s.pool.length} questions available, but ${s.count} requested.`);
+        return;
+      }
+    }
+
+    // Auto-select questions per section
+    const allQuestions = sectionsWithCat.flatMap(s => autoSelectQuestions(s.pool, s.count));
+    const primaryCategory = sectionsWithCat[0]?.category || null;
 
     const payload = {
       name: name.trim(),
@@ -212,12 +199,12 @@ const CreateTest = () => {
 
       <div>
         <h1 className="text-2xl font-black text-slate-900 dark:text-white">{isEdit ? 'Modify Test' : 'Create Test'}</h1>
-        <p className="text-sm text-slate-400 mt-0.5">Add multiple category sections to include questions from different subjects.</p>
+        <p className="text-sm text-slate-400 mt-0.5">Select a category and enter how many questions to auto-pick per section.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-        {/* Left: Basic config + Sections */}
+        {/* Left */}
         <div className="lg:col-span-2 flex flex-col gap-6">
 
           {/* Basic Config */}
@@ -238,7 +225,7 @@ const CreateTest = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-white">Question Sections</h3>
-                <p className="text-xs text-slate-400 mt-0.5">{totalSelected} questions selected across {sections.length} section{sections.length > 1 ? 's' : ''}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{totalSelected} questions will be auto-selected across {sections.length} section{sections.length > 1 ? 's' : ''}</p>
               </div>
               <Button type="button" variant="outline" size="sm" icon={Plus} onClick={addSection} className="text-xs font-bold">
                 Add Section
@@ -246,8 +233,9 @@ const CreateTest = () => {
             </div>
 
             {sections.map((section, idx) => {
-              const filtered = section.pool.filter(q => q.question.toLowerCase().includes(section.search.toLowerCase()));
               const catName = categories.find(c => c._id === section.category)?.name;
+              const available = section.pool.length;
+              const countExceeds = section.count > available && available > 0;
 
               return (
                 <Card key={section.id} hover={false} className="p-0 overflow-hidden">
@@ -256,10 +244,10 @@ const CreateTest = () => {
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-black flex items-center justify-center">{idx + 1}</span>
                       <div>
-                        <p className="text-sm font-bold text-slate-800 dark:text-white">
-                          {catName || 'Select a category'}
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{catName || 'Select a category'}</p>
+                        <p className="text-[10px] text-slate-400">
+                          {available > 0 ? `${Math.min(section.count, available)} of ${available} questions` : 'No questions loaded'}
                         </p>
-                        <p className="text-[10px] text-slate-400">{section.questions.length} questions selected</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -276,67 +264,62 @@ const CreateTest = () => {
 
                   {section.expanded && (
                     <div className="p-5 flex flex-col gap-4">
-                      {/* Category picker */}
-                      <Select
-                        label="Category"
-                        placeholder="Select category for this section"
-                        value={section.category}
-                        options={categories.map(c => ({ label: c.name, value: c._id }))}
-                        onChange={e => handleSectionCategoryChange(section.id, e.target.value)}
-                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Category */}
+                        <Select
+                          label="Category"
+                          placeholder="Select category"
+                          value={section.category}
+                          options={categories.map(c => ({ label: c.name, value: c._id }))}
+                          onChange={e => handleSectionCategoryChange(section.id, e.target.value)}
+                        />
 
-                      {/* Question pool */}
-                      {!section.category ? (
-                        <div className="py-8 text-center text-slate-400 text-xs">Select a category above to load questions.</div>
-                      ) : section.loadingPool ? (
-                        <div className="py-8 flex justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
-                      ) : section.pool.length === 0 ? (
-                        <div className="py-8 text-center text-slate-400 text-xs">No active questions in this category. Add questions first.</div>
-                      ) : (
-                        <div className="flex flex-col gap-3">
-                          {/* Search + select all */}
-                          <div className="flex items-center gap-2">
-                            <div className="relative flex-1">
-                              <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                              <input type="text" placeholder="Search questions..." value={section.search}
-                                onChange={e => setSections(prev => prev.map(s => s.id === section.id ? { ...s, search: e.target.value } : s))}
-                                className="w-full py-1.5 pl-8 pr-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:outline-none" />
-                            </div>
-                            <button type="button" onClick={() => handleSelectAll(section.id)} className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 whitespace-nowrap">Select All</button>
-                            <span className="text-slate-300 dark:text-slate-700">|</span>
-                            <button type="button" onClick={() => handleClearAll(section.id)} className="text-[10px] font-bold text-slate-400 hover:text-slate-500 whitespace-nowrap">Clear</button>
+                        {/* Count input */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            No. of Questions to Pick
+                          </label>
+                          <div className="relative">
+                            <Hash className="absolute left-3 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <input
+                              type="number"
+                              min={1}
+                              max={available || 999}
+                              value={section.count}
+                              onChange={e => handleCountChange(section.id, e.target.value)}
+                              disabled={!section.category}
+                              className={`w-full pl-9 pr-4 py-2.5 rounded-xl border-2 text-sm font-bold transition-all focus:outline-none ${
+                                countExceeds
+                                  ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400'
+                                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-indigo-500'
+                              } disabled:opacity-40 disabled:cursor-not-allowed`}
+                            />
                           </div>
+                          {section.loadingPool && (
+                            <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                              <Loader2 className="w-3 h-3 animate-spin" /> Loading questions...
+                            </p>
+                          )}
+                          {!section.loadingPool && available > 0 && (
+                            <p className={`text-[10px] font-semibold ${countExceeds ? 'text-rose-500' : 'text-emerald-500'}`}>
+                              {countExceeds
+                                ? `Only ${available} questions available`
+                                : `${available} questions available · ${Math.min(section.count, available)} will be randomly picked`}
+                            </p>
+                          )}
+                          {!section.loadingPool && section.category && available === 0 && (
+                            <p className="text-[10px] text-rose-500 font-semibold">No active questions in this category</p>
+                          )}
+                        </div>
+                      </div>
 
-                          <p className="text-[10px] text-slate-400">{filtered.length} questions available · {section.questions.length} selected</p>
-
-                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
-                            {filtered.map(q => {
-                              const checked = section.questions.includes(q._id);
-                              return (
-                                <div key={q._id} onClick={() => handleToggleQuestion(section.id, q._id)}
-                                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
-                                    checked
-                                      ? 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/10'
-                                      : 'border-slate-100 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
-                                  }`}>
-                                  <span className="shrink-0 mt-0.5">
-                                    {checked
-                                      ? <CheckSquare className="w-4 h-4 text-indigo-500" />
-                                      : <Square className="w-4 h-4 text-slate-400" />}
-                                  </span>
-                                  <div>
-                                    <p className="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed">{q.question}</p>
-                                    <div className="flex gap-2 text-[9px] text-slate-400 mt-1 font-bold">
-                                      <span className="capitalize">{q.difficulty}</span>
-                                      <span>•</span>
-                                      <span>{q.marks} mark{q.marks > 1 ? 's' : ''}</span>
-                                      {q.subcategory?.name && <><span>•</span><span>{q.subcategory.name}</span></>}
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                      {/* Auto-select info */}
+                      {available > 0 && (
+                        <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2.5">
+                          <Shuffle className="w-4 h-4 text-indigo-500 shrink-0" />
+                          <p className="text-xs text-indigo-600 dark:text-indigo-400">
+                            <span className="font-bold">{Math.min(section.count, available)} questions</span> will be randomly auto-selected from the pool of {available} on save.
+                          </p>
                         </div>
                       )}
                     </div>
@@ -414,10 +397,11 @@ const CreateTest = () => {
             <div className="space-y-2">
               {sections.map((s, i) => {
                 const cat = categories.find(c => c._id === s.category);
+                const pick = Math.min(s.count, s.pool.length);
                 return (
                   <div key={s.id} className="flex justify-between text-xs">
                     <span className="text-slate-500">Section {i + 1}: {cat?.name || 'No category'}</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{s.questions.length} Qs</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{pick} Qs</span>
                   </div>
                 );
               })}
