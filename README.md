@@ -175,7 +175,7 @@ npm run dev
 - **API Health Check**: http://localhost:5000/api/health
 
 ### Default Admin Credentials
-- **Email**: admin@oit_stack.com
+- **Email**: admin@oitstack.com
 - **Password**: Admin@123
 
 ⚠️ **Change the admin password after first login!**

@@ -93,7 +93,7 @@ const AdminLayout = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user?.name || 'Admin'}</p>
-              <p className="text-xs text-gray-400 truncate">{user?.email || 'admin@oit_stack.com'}</p>
+              <p className="text-xs text-gray-400 truncate">{user?.email || 'admin@oitstack.com'}</p>
             </div>
             <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors" title="Logout">
               <LogOut className="w-4 h-4 text-gray-400" />

@@ -263,7 +263,7 @@ const Analytics = () => {
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40 text-sm">
                   {studentData.topPerformers.length > 0 ? (
                     studentData.topPerformers
-                      .filter(item => item.user?.email !== 'admin@oit_stack.com')
+                      .filter(item => item.user?.email !== 'admin@oitstack.com')
                       .map((item, idx) => (
                       <tr key={item._id || idx} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
                         <td className="py-3.5 px-4 font-bold text-slate-700 dark:text-slate-300">

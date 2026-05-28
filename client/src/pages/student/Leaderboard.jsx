@@ -28,7 +28,7 @@ const Leaderboard = () => {
           limit: 15,
         });
 
-        setBoard((res.data.leaderboard || []).filter(item => item.user?.email !== 'admin@oit_stack.com'));
+        setBoard((res.data.leaderboard || []).filter(item => item.user?.email !== 'admin@oitstack.com'));
         setMyRank(res.data.myRank);
         setPagination({
           page: res.data.pagination.page,
