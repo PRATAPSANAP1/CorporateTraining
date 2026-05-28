@@ -26,6 +26,10 @@ const auth = async (req, res, next) => {
       return errorResponse(res, 401, 'Not authorized, user not found');
     }
 
+    if (user.activeSessionId && decoded.sessionId !== user.activeSessionId) {
+      return errorResponse(res, 401, 'Session expired or logged in from another device');
+    }
+
     req.user = user;
     next();
   } catch (error) {

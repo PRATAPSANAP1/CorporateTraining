@@ -9,6 +9,7 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import DashboardRedirect from './components/DashboardRedirect';
+import SessionManager from './components/common/SessionManager';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -60,6 +61,7 @@ function App() {
           className: 'dark:bg-slate-900 dark:text-white border dark:border-slate-800 text-xs font-semibold rounded-2xl',
         }}
       />
+      <SessionManager />
       <Routes>
         {/* Redirect Root to login or dashboard */}
         <Route path="/" element={<Navigate to="/login" replace />} />

@@ -57,12 +57,8 @@ const Login = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const result = await dispatch(login({ email: formData.email, password: formData.password })).unwrap();
-      if (result?.token) {
-        localStorage.setItem('token', result.token);
-      }
+      await dispatch(login({ email: formData.email, password: formData.password })).unwrap();
       toast.success('Welcome back!');
-      navigate('/dashboard');
     } catch (err) {
       const message = err?.message || err || 'Login failed. Please try again.';
       toast.error(message);

@@ -16,11 +16,12 @@ const register = async (req, res) => {
       return errorResponse(res, 400, 'User with this email already exists');
     }
 
-    const user = await User.create({ name, email, password });
+    const activeSessionId = crypto.randomBytes(16).toString('hex');
+    const user = await User.create({ name, email, password, activeSessionId });
 
     await Leaderboard.create({ user: user._id });
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role, user.activeSessionId);
 
     const userResponse = {
       _id: user._id,
@@ -57,7 +58,11 @@ const login = async (req, res) => {
       return errorResponse(res, 401, 'Invalid email or password');
     }
 
-    const token = generateToken(user._id);
+    const activeSessionId = crypto.randomBytes(16).toString('hex');
+    user.activeSessionId = activeSessionId;
+    await user.save();
+
+    const token = generateToken(user._id, user.role, user.activeSessionId);
 
     const userResponse = {
       _id: user._id,

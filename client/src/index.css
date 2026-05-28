@@ -75,6 +75,12 @@
 }
 
 @layer components {
+  .glass-card {
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80;
+    @apply shadow-sm hover:shadow-lg hover:shadow-slate-200/60 dark:hover:shadow-slate-900/60;
+    @apply transition-all duration-300;
+  }
+
   .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(16px);
