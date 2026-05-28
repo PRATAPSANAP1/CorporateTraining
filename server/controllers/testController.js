@@ -167,11 +167,11 @@ const startTest = async (req, res) => {
     }
 
     const now = new Date();
-    if (test.startDate && now < test.startDate) {
-      return errorResponse(res, 400, 'This test has not started yet');
+    if (test.startDate && now < new Date(test.startDate)) {
+      return errorResponse(res, 400, `This test has not started yet. It opens on ${new Date(test.startDate).toLocaleString()}`);
     }
-    if (test.endDate && now > test.endDate) {
-      return errorResponse(res, 400, 'This test has ended');
+    if (test.endDate && now > new Date(test.endDate)) {
+      return errorResponse(res, 400, `This test has ended on ${new Date(test.endDate).toLocaleString()}`);
     }
 
     let testQuestions = [...test.questions];

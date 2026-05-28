@@ -36,6 +36,11 @@ const TestStart = () => {
   if (loading) return <Loader />;
   if (!test) return null;
 
+  const now = new Date();
+  const notStarted = test.startDate && now < new Date(test.startDate);
+  const hasEnded = test.endDate && now > new Date(test.endDate);
+  const isUnavailable = notStarted || hasEnded;
+
   const handleStart = () => {
     setConfirmOpen(false);
     navigate(`/student/tests/${id}/take`);
@@ -104,6 +109,30 @@ const TestStart = () => {
         {/* Instructions panel */}
         <Card className="md:col-span-2 flex flex-col gap-6" hover={false}>
           <h3 className="font-bold text-slate-800 dark:text-white">Instructions & Terms</h3>
+          {/* Date availability banner */}
+          {notStarted && (
+            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex gap-3 items-start">
+              <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Test Not Yet Available</p>
+                <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
+                  This test opens on <strong>{new Date(test.startDate).toLocaleString()}</strong>. Come back then to attempt it.
+                </p>
+              </div>
+            </div>
+          )}
+          {hasEnded && (
+            <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 flex gap-3 items-start">
+              <ShieldAlert className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-rose-700 dark:text-rose-400">Test Has Ended</p>
+                <p className="text-xs text-rose-600 dark:text-rose-500 mt-0.5">
+                  This test ended on <strong>{new Date(test.endDate).toLocaleString()}</strong> and is no longer available.
+                </p>
+              </div>
+            </div>
+          )}
+
           <ol className="list-decimal pl-5 text-sm text-slate-600 dark:text-slate-400 flex flex-col gap-3 leading-relaxed">
             <li>Ensure you have a stable internet connection. Do not close or refresh the window once the test starts.</li>
             <li>This is a timed test. The countdown will begin immediately upon clicking 'Start Test'. The timer cannot be paused.</li>
@@ -136,11 +165,11 @@ const TestStart = () => {
           <div className="flex gap-4 mt-2">
             <Button
               variant="primary"
-              disabled={!agreed}
+              disabled={!agreed || isUnavailable}
               className="font-bold px-8 shadow-blue-500/10"
               onClick={() => setConfirmOpen(true)}
             >
-              Start Test
+              {notStarted ? 'Not Yet Available' : hasEnded ? 'Test Ended' : 'Start Test'}
             </Button>
             <Button
               variant="secondary"
