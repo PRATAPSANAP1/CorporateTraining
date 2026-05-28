@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Save, ChevronLeft, HelpCircle, Plus, Search, CheckSquare, Square, Loader2 } from 'lucide-react';
+import { Save, ChevronLeft, Plus, Search, CheckSquare, Square, Loader2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import adminService from '../../services/adminService';
 import Card from '../../components/common/Card';
@@ -9,6 +9,9 @@ import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 
+// One section = one category + its selected questions
+const newSection = () => ({ id: Date.now(), category: '', questions: [], pool: [], loadingPool: false, search: '', expanded: true });
+
 const CreateTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,92 +19,53 @@ const CreateTest = () => {
 
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-
-  const [questionPool, setQuestionPool] = useState([]);
-  const [loadingPool, setLoadingPool] = useState(false);
-  const [poolSearch, setPoolSearch] = useState('');
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
   const [difficulty, setDifficulty] = useState('mixed');
-  const [totalTime, setTotalTime] = useState(30); // minutes
+  const [totalTime, setTotalTime] = useState(30);
   const [passingMarks, setPassingMarks] = useState(10);
   const [negativeMarking, setNegativeMarking] = useState(false);
   const [negativeMarkValue, setNegativeMarkValue] = useState(0.25);
   const [randomizeQuestions, setRandomizeQuestions] = useState(true);
   const [shuffleOptions, setShuffleOptions] = useState(false);
-  const [selectedQuestions, setSelectedQuestions] = useState([]); // Array of IDs
   const [isActive, setIsActive] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  const [sections, setSections] = useState([newSection()]);
+
+  const totalSelected = sections.reduce((sum, s) => sum + s.questions.length, 0);
+
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await adminService.getCategories();
-        setCategories(res.data || []);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-      }
-    };
-    loadCategories();
+    adminService.getCategories()
+      .then(res => setCategories(res.data || []))
+      .catch(err => console.error('Error fetching categories:', err));
   }, []);
 
-  useEffect(() => {
-    if (!category) {
-      setSubcategories([]);
-      return;
+  // Load question pool for a section when its category changes
+  const loadPoolForSection = useCallback(async (sectionId, categoryId) => {
+    if (!categoryId) return;
+    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, loadingPool: true, pool: [] } : s));
+    try {
+      const res = await adminService.getQuestions({ category: categoryId, limit: 500, includeInactive: 'true' });
+      const pool = (res.data.questions || []).filter(q => q.isActive);
+      setSections(prev => prev.map(s => s.id === sectionId ? { ...s, pool, loadingPool: false } : s));
+    } catch {
+      setSections(prev => prev.map(s => s.id === sectionId ? { ...s, loadingPool: false } : s));
     }
-    const loadSubcategories = async () => {
-      try {
-        const res = await adminService.getSubcategories(category);
-        setSubcategories(res.data || []);
-      } catch (err) {
-        console.error('Error fetching subcategories:', err);
-      }
-    };
-    loadSubcategories();
-  }, [category]);
+  }, []);
 
-  useEffect(() => {
-    if (!category) {
-      setQuestionPool([]);
-      return;
-    }
-
-    const fetchQuestionPool = async () => {
-      try {
-        setLoadingPool(true);
-        const res = await adminService.getQuestions({
-          category,
-          limit: 100 // load a large subset to choose from
-        });
-        setQuestionPool(res.data.questions || []);
-      } catch (err) {
-        console.error('Error loading question pool:', err);
-      } finally {
-        setLoadingPool(false);
-      }
-    };
-    fetchQuestionPool();
-  }, [category]);
-
+  // Edit mode: load existing test
   useEffect(() => {
     if (!isEdit) return;
-
-    const loadTestData = async () => {
+    const load = async () => {
       try {
         setLoading(true);
         const res = await adminService.getTest(id);
         const test = res.data;
-
         setName(test.name);
         setDescription(test.description || '');
-        setCategory(test.category?._id || test.category);
-        setSubcategory(test.subcategory?._id || test.subcategory || '');
         setDifficulty(test.difficulty || 'mixed');
         setTotalTime(test.totalTime);
         setPassingMarks(test.passingMarks || 0);
@@ -110,74 +74,104 @@ const CreateTest = () => {
         setRandomizeQuestions(test.randomizeQuestions !== undefined ? test.randomizeQuestions : true);
         setShuffleOptions(test.shuffleOptions || false);
         setIsActive(test.isActive !== undefined ? test.isActive : true);
-        setSelectedQuestions(test.questions?.map(q => q._id || q) || []);
+        if (test.startDate) setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
+        if (test.endDate) setEndDate(new Date(test.endDate).toISOString().slice(0, 16));
 
-        if (test.startDate) {
-          setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
-        }
-        if (test.endDate) {
-          setEndDate(new Date(test.endDate).toISOString().slice(0, 16));
-        }
-      } catch (err) {
-        console.error('Error loading test details:', err.message);
+        // Group existing questions by category into sections
+        const questions = test.questions || [];
+        const catMap = {};
+        questions.forEach(q => {
+          const catId = q.category?._id || q.category || 'unknown';
+          if (!catMap[catId]) catMap[catId] = [];
+          catMap[catId].push(q._id || q);
+        });
+
+        const builtSections = Object.entries(catMap).map(([catId, qIds]) => ({
+          id: Date.now() + Math.random(),
+          category: catId,
+          questions: qIds,
+          pool: [],
+          loadingPool: false,
+          search: '',
+          expanded: true,
+        }));
+
+        setSections(builtSections.length > 0 ? builtSections : [newSection()]);
+
+        // Load pools for each section
+        builtSections.forEach(s => loadPoolForSection(s.id, s.category));
+      } catch {
         toast.error('Failed to load test details.');
         navigate('/admin/tests');
       } finally {
         setLoading(false);
       }
     };
-    loadTestData();
-  }, [id, isEdit, navigate]);
+    load();
+  }, [id, isEdit, navigate, loadPoolForSection]);
 
-  const handleToggleQuestionSelection = (qId) => {
-    setSelectedQuestions(prev => {
-      if (prev.includes(qId)) {
-        return prev.filter(id => id !== qId);
-      } else {
-        return [...prev, qId];
-      }
-    });
+  const handleSectionCategoryChange = (sectionId, categoryId) => {
+    setSections(prev => prev.map(s =>
+      s.id === sectionId ? { ...s, category: categoryId, questions: [], pool: [], search: '' } : s
+    ));
+    if (categoryId) loadPoolForSection(sectionId, categoryId);
   };
 
-  const handleSelectAllFiltered = () => {
-    const filteredIds = filteredPool.map(q => q._id);
-    setSelectedQuestions(prev => {
-      const added = [...prev];
-      filteredIds.forEach(id => {
-        if (!added.includes(id)) {
-          added.push(id);
-        }
-      });
-      return added;
-    });
+  const handleToggleQuestion = (sectionId, qId) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const questions = s.questions.includes(qId)
+        ? s.questions.filter(i => i !== qId)
+        : [...s.questions, qId];
+      return { ...s, questions };
+    }));
   };
 
-  const handleClearAllFiltered = () => {
-    const filteredIds = filteredPool.map(q => q._id);
-    setSelectedQuestions(prev => prev.filter(id => !filteredIds.includes(id)));
+  const handleSelectAll = (sectionId) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const filtered = s.pool.filter(q => q.question.toLowerCase().includes(s.search.toLowerCase()));
+      const ids = filtered.map(q => q._id);
+      const merged = [...new Set([...s.questions, ...ids])];
+      return { ...s, questions: merged };
+    }));
+  };
+
+  const handleClearAll = (sectionId) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const filtered = s.pool.filter(q => q.question.toLowerCase().includes(s.search.toLowerCase()));
+      const ids = filtered.map(q => q._id);
+      return { ...s, questions: s.questions.filter(i => !ids.includes(i)) };
+    }));
+  };
+
+  const addSection = () => setSections(prev => [...prev, newSection()]);
+
+  const removeSection = (sectionId) => {
+    if (sections.length === 1) { toast.error('At least one section is required.'); return; }
+    setSections(prev => prev.filter(s => s.id !== sectionId));
+  };
+
+  const toggleExpand = (sectionId) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, expanded: !s.expanded } : s));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!name.trim()) { toast.error('Test name is required.'); return; }
+    if (totalSelected === 0) { toast.error('Please select at least one question.'); return; }
+    const hasEmptyCat = sections.some(s => s.questions.length > 0 && !s.category);
+    if (hasEmptyCat) { toast.error('Please assign a category to all sections with questions.'); return; }
 
-    if (!name.trim()) {
-      toast.error('Test name is required.');
-      return;
-    }
-    if (!category) {
-      toast.error('Please assign a Category.');
-      return;
-    }
-    if (selectedQuestions.length === 0) {
-      toast.error('Please select at least one question to include in the test.');
-      return;
-    }
+    const allQuestions = sections.flatMap(s => s.questions);
+    // Use first section's category as the primary category for backward compat
+    const primaryCategory = sections.find(s => s.category)?.category || null;
 
     const payload = {
       name: name.trim(),
       description: description.trim(),
-      category,
-      subcategory: subcategory || null,
+      category: primaryCategory,
       difficulty,
       totalTime: parseInt(totalTime, 10),
       passingMarks: parseFloat(passingMarks),
@@ -185,8 +179,8 @@ const CreateTest = () => {
       negativeMarkValue: negativeMarking ? parseFloat(negativeMarkValue) : 0,
       randomizeQuestions,
       shuffleOptions,
-      questions: selectedQuestions,
-      totalQuestions: selectedQuestions.length,
+      questions: allQuestions,
+      totalQuestions: allQuestions.length,
       isActive,
       startDate: startDate || null,
       endDate: endDate || null,
@@ -203,8 +197,7 @@ const CreateTest = () => {
       }
       navigate('/admin/tests');
     } catch (err) {
-      console.error('Error saving test:', err.message);
-      toast.error(err.response?.data?.message || 'Error saving test configurations.');
+      toast.error(err.response?.data?.message || 'Error saving test.');
     } finally {
       setLoading(false);
     }
@@ -212,309 +205,241 @@ const CreateTest = () => {
 
   if (loading && !name) return <Loader />;
 
-  const filteredPool = questionPool.filter(q =>
-    q.question.toLowerCase().includes(poolSearch.toLowerCase())
-  );
-
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-12">
-      {/* Back button */}
       <div>
-        <Link
-          to="/admin/tests"
-          className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
-        >
+        <Link to="/admin/tests" className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">
           <ChevronLeft className="w-4 h-4 mr-1.5" /> Back to Tests List
         </Link>
       </div>
 
       <div>
-        <h1 className="text-2xl font-black text-slate-800 dark:text-white font-black">
-          {isEdit ? 'Modify Test Session' : 'Create Timed Test'}
-        </h1>
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white">{isEdit ? 'Modify Test' : 'Create Test'}</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Add multiple category sections to include questions from different subjects.</p>
       </div>
 
-      {/* Form Panel */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-        {/* Basic options left side */}
+        {/* Left: Basic config + Sections */}
         <div className="lg:col-span-2 flex flex-col gap-6">
+
+          {/* Basic Config */}
           <Card hover={false} className="p-6 flex flex-col gap-5">
-            <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-50 dark:border-slate-800">Basic Configurations</h3>
-
-            <Input
-              label="Test Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Quantitative Reasoning Mock 1"
-            />
-
+            <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">Basic Configuration</h3>
+            <Input label="Test Name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Quantitative Reasoning Mock 1" />
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Description & Syllabus
-              </label>
-              <textarea
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Details about topics included, marks distributions, etc..."
-                className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
-              />
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
+              <textarea rows={2} value={description} onChange={e => setDescription(e.target.value)}
+                placeholder="Topics covered, marks distribution..."
+                className="w-full py-2.5 px-4 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none transition-all" />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Select
-                label="Parent Category"
-                placeholder="Select Category"
-                value={category}
-                options={categories.map(c => ({ label: c.name, value: c._id }))}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setSelectedQuestions([]); // Clear selected questions when category shifts
-                }}
-              />
-              <Select
-                label="Subcategory (Optional)"
-                placeholder="Select Subcategory"
-                value={subcategory}
-                options={subcategories.map(s => ({ label: s.name, value: s._id }))}
-                onChange={(e) => setSubcategory(e.target.value)}
-                disabled={!category}
-              />
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              <Select
-                label="Difficulty Style"
-                value={difficulty}
-                options={[
-                  { label: 'Easy', value: 'easy' },
-                  { label: 'Medium', value: 'medium' },
-                  { label: 'Hard', value: 'hard' },
-                  { label: 'Mixed Styles', value: 'mixed' }
-                ]}
-                onChange={(e) => setDifficulty(e.target.value)}
-              />
-              <Input
-                label="Duration (Mins)"
-                type="number"
-                value={totalTime}
-                onChange={(e) => setTotalTime(e.target.value)}
-              />
-              <Input
-                label="Passing Score"
-                type="number"
-                value={passingMarks}
-                onChange={(e) => setPassingMarks(e.target.value)}
-              />
+              <Select label="Difficulty" value={difficulty}
+                options={[{ label: 'Easy', value: 'easy' }, { label: 'Medium', value: 'medium' }, { label: 'Hard', value: 'hard' }, { label: 'Mixed', value: 'mixed' }]}
+                onChange={e => setDifficulty(e.target.value)} />
+              <Input label="Duration (mins)" type="number" value={totalTime} onChange={e => setTotalTime(e.target.value)} />
+              <Input label="Passing Score" type="number" value={passingMarks} onChange={e => setPassingMarks(e.target.value)} />
             </div>
           </Card>
 
-          {/* Question Pool selection */}
-          <Card hover={false} className="p-6 flex flex-col gap-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-50 dark:border-slate-800">
-              <h3 className="font-bold text-slate-800 dark:text-white">Included Questions ({selectedQuestions.length})</h3>
-              {category && filteredPool.length > 0 && (
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleSelectAllFiltered}
-                    className="text-[10px] uppercase font-bold text-indigo-500 hover:text-indigo-600"
-                  >
-                    Select Page
-                  </button>
-                  <span className="text-slate-300 dark:text-slate-700">|</span>
-                  <button
-                    type="button"
-                    onClick={handleClearAllFiltered}
-                    className="text-[10px] uppercase font-bold text-slate-400 hover:text-slate-500"
-                  >
-                    Clear Page
-                  </button>
-                </div>
-              )}
+          {/* Sections */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-800 dark:text-white">Question Sections</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{totalSelected} questions selected across {sections.length} section{sections.length > 1 ? 's' : ''}</p>
+              </div>
+              <Button type="button" variant="outline" size="sm" icon={Plus} onClick={addSection} className="text-xs font-bold">
+                Add Section
+              </Button>
             </div>
 
-            {!category ? (
-              <div className="py-12 text-center text-slate-400 text-xs">
-                Please select a parent Category above to load available questions pool.
-              </div>
-            ) : loadingPool ? (
-              <div className="py-12 flex justify-center">
-                <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
-              </div>
-            ) : filteredPool.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-xs">
-                No active questions found in this category. Write questions first.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <div className="relative mb-2">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                    <Search className="w-4 h-4" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search question pool..."
-                    value={poolSearch}
-                    onChange={(e) => setPoolSearch(e.target.value)}
-                    className="w-full py-1.5 pl-9 pr-4 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:outline-none"
-                  />
-                </div>
+            {sections.map((section, idx) => {
+              const filtered = section.pool.filter(q => q.question.toLowerCase().includes(section.search.toLowerCase()));
+              const catName = categories.find(c => c._id === section.category)?.name;
 
-                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
-                  {filteredPool.map((q) => {
-                    const isChecked = selectedQuestions.includes(q._id);
-                    return (
-                      <div
-                        key={q._id}
-                        onClick={() => handleToggleQuestionSelection(q._id)}
-                        className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
-                          isChecked
-                            ? 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/5 text-slate-800 dark:text-white'
-                            : 'border-slate-100 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        <span className="shrink-0 mt-0.5">
-                          {isChecked ? (
-                            <CheckSquare className="w-4.5 h-4.5 text-indigo-500" />
-                          ) : (
-                            <Square className="w-4.5 h-4.5" />
-                          )}
-                        </span>
-                        <div>
-                          <p className="text-xs font-bold leading-relaxed">{q.question}</p>
-                          <div className="flex gap-2 text-[9px] text-slate-400 mt-1 font-bold">
-                            <span className="capitalize">{q.difficulty}</span>
-                            <span>•</span>
-                            <span>{q.marks} marks</span>
+              return (
+                <Card key={section.id} hover={false} className="p-0 overflow-hidden">
+                  {/* Section header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-black flex items-center justify-center">{idx + 1}</span>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">
+                          {catName || 'Select a category'}
+                        </p>
+                        <p className="text-[10px] text-slate-400">{section.questions.length} questions selected</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => toggleExpand(section.id)} className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 transition-colors">
+                        {section.expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      {sections.length > 1 && (
+                        <button type="button" onClick={() => removeSection(section.id)} className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-400 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {section.expanded && (
+                    <div className="p-5 flex flex-col gap-4">
+                      {/* Category picker */}
+                      <Select
+                        label="Category"
+                        placeholder="Select category for this section"
+                        value={section.category}
+                        options={categories.map(c => ({ label: c.name, value: c._id }))}
+                        onChange={e => handleSectionCategoryChange(section.id, e.target.value)}
+                      />
+
+                      {/* Question pool */}
+                      {!section.category ? (
+                        <div className="py-8 text-center text-slate-400 text-xs">Select a category above to load questions.</div>
+                      ) : section.loadingPool ? (
+                        <div className="py-8 flex justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
+                      ) : section.pool.length === 0 ? (
+                        <div className="py-8 text-center text-slate-400 text-xs">No active questions in this category. Add questions first.</div>
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          {/* Search + select all */}
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <Search className="absolute left-3 top-2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                              <input type="text" placeholder="Search questions..." value={section.search}
+                                onChange={e => setSections(prev => prev.map(s => s.id === section.id ? { ...s, search: e.target.value } : s))}
+                                className="w-full py-1.5 pl-8 pr-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:outline-none" />
+                            </div>
+                            <button type="button" onClick={() => handleSelectAll(section.id)} className="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 whitespace-nowrap">Select All</button>
+                            <span className="text-slate-300 dark:text-slate-700">|</span>
+                            <button type="button" onClick={() => handleClearAll(section.id)} className="text-[10px] font-bold text-slate-400 hover:text-slate-500 whitespace-nowrap">Clear</button>
+                          </div>
+
+                          <p className="text-[10px] text-slate-400">{filtered.length} questions available · {section.questions.length} selected</p>
+
+                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                            {filtered.map(q => {
+                              const checked = section.questions.includes(q._id);
+                              return (
+                                <div key={q._id} onClick={() => handleToggleQuestion(section.id, q._id)}
+                                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                                    checked
+                                      ? 'border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/10'
+                                      : 'border-slate-100 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
+                                  }`}>
+                                  <span className="shrink-0 mt-0.5">
+                                    {checked
+                                      ? <CheckSquare className="w-4 h-4 text-indigo-500" />
+                                      : <Square className="w-4 h-4 text-slate-400" />}
+                                  </span>
+                                  <div>
+                                    <p className="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed">{q.question}</p>
+                                    <div className="flex gap-2 text-[9px] text-slate-400 mt-1 font-bold">
+                                      <span className="capitalize">{q.difficulty}</span>
+                                      <span>•</span>
+                                      <span>{q.marks} mark{q.marks > 1 ? 's' : ''}</span>
+                                      {q.subcategory?.name && <><span>•</span><span>{q.subcategory.name}</span></>}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </Card>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Right column settings toggles & schedules */}
+        {/* Right: Advanced settings */}
         <div className="flex flex-col gap-6">
           <Card hover={false} className="p-6 flex flex-col gap-5">
-            <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-50 dark:border-slate-800">Advanced Controls</h3>
+            <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">Advanced Controls</h3>
 
-            {/* Negative Marking */}
             <div className="flex items-center justify-between">
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Negative Penalty</label>
-                <p className="text-[10px] text-slate-400 leading-relaxed mt-0.5">Deduct marks for incorrect keys.</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Deduct marks for wrong answers.</p>
               </div>
-              <input
-                type="checkbox"
-                checked={negativeMarking}
-                onChange={(e) => setNegativeMarking(e.target.checked)}
-                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-              />
+              <input type="checkbox" checked={negativeMarking} onChange={e => setNegativeMarking(e.target.checked)}
+                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
             </div>
-
             {negativeMarking && (
-              <Input
-                label="Penalty Value"
-                type="number"
-                step="0.05"
-                value={negativeMarkValue}
-                onChange={(e) => setNegativeMarkValue(e.target.value)}
-              />
+              <Input label="Penalty Value" type="number" step="0.05" value={negativeMarkValue} onChange={e => setNegativeMarkValue(e.target.value)} />
             )}
 
-            <div className="border-t border-slate-50 dark:border-slate-800/80 pt-4 flex flex-col gap-4">
-              {/* Randomization */}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Randomize Questions</label>
-                  <p className="text-[10px] text-slate-400 leading-relaxed mt-0.5">Shuffles question sequence order.</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Shuffle question order.</p>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={randomizeQuestions}
-                  onChange={(e) => setRandomizeQuestions(e.target.checked)}
-                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                />
+                <input type="checkbox" checked={randomizeQuestions} onChange={e => setRandomizeQuestions(e.target.checked)}
+                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
               </div>
-
-              {/* Shuffle Options */}
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Shuffle Answers Options</label>
-                  <p className="text-[10px] text-slate-400 leading-relaxed mt-0.5">Scramble options placement order.</p>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Shuffle Options</label>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Scramble answer choices.</p>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={shuffleOptions}
-                  onChange={(e) => setShuffleOptions(e.target.checked)}
-                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                />
+                <input type="checkbox" checked={shuffleOptions} onChange={e => setShuffleOptions(e.target.checked)}
+                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
               </div>
             </div>
 
-            <div className="border-t border-slate-50 dark:border-slate-800/80 pt-4 flex flex-col gap-4">
-              {/* Schedules */}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex flex-col gap-4">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1.5">
-                  Start Date (Optional)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full py-2 px-3 text-xs rounded-xl transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
-                />
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1.5">Start Date (Optional)</label>
+                <input type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)}
+                  className="w-full py-2 px-3 text-xs rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none transition-all" />
               </div>
-
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1.5">
-                  End Date (Optional)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full py-2 px-3 text-xs rounded-xl transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
-                />
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1.5">End Date (Optional)</label>
+                <input type="datetime-local" value={endDate} onChange={e => setEndDate(e.target.value)}
+                  className="w-full py-2 px-3 text-xs rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none transition-all" />
               </div>
             </div>
 
-            <div className="border-t border-slate-50 dark:border-slate-800/80 pt-4">
-              {/* Active Toggle */}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Set Active immediately</label>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Make test visible to students.</p>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Set Active</label>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Visible to students immediately.</p>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                />
+                <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)}
+                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
               </div>
             </div>
           </Card>
 
-          {/* Action button triggers */}
-          <div className="flex gap-4">
-            <Button
-              variant="primary"
-              type="submit"
-              loading={loading}
-              icon={Save}
-              fullWidth
-              className="font-bold shadow-indigo-500/10 py-3"
-            >
-              {isEdit ? 'Save Test Changes' : 'Create Placement Test'}
-            </Button>
-          </div>
+          {/* Summary */}
+          <Card hover={false} className="p-5 bg-indigo-50/50 dark:bg-indigo-500/5 border-indigo-500/20">
+            <h4 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-3">Test Summary</h4>
+            <div className="space-y-2">
+              {sections.map((s, i) => {
+                const cat = categories.find(c => c._id === s.category);
+                return (
+                  <div key={s.id} className="flex justify-between text-xs">
+                    <span className="text-slate-500">Section {i + 1}: {cat?.name || 'No category'}</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{s.questions.length} Qs</span>
+                  </div>
+                );
+              })}
+              <div className="border-t border-indigo-500/20 pt-2 flex justify-between text-xs font-black">
+                <span className="text-slate-700 dark:text-slate-300">Total Questions</span>
+                <span className="text-indigo-600 dark:text-indigo-400">{totalSelected}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Button variant="primary" type="submit" loading={loading} icon={Save} fullWidth className="font-bold py-3 shadow-indigo-500/10">
+            {isEdit ? 'Save Changes' : 'Create Test'}
+          </Button>
         </div>
 
       </form>
@@ -523,4 +448,3 @@ const CreateTest = () => {
 };
 
 export default CreateTest;
-
