@@ -42,7 +42,7 @@ const ManageCodingProblems = () => {
       setProblems(list);
     } catch (err) {
       console.error('Error fetching coding problems:', err.message);
-      toast.error('Failed to load coding sandbox library');
+      toast.error('Failed to load coding problems');
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ const ManageCodingProblems = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Sandbox Problems</h1>
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Problems</h1>
         </div>
 
         <Button
@@ -223,7 +223,7 @@ const ManageCodingProblems = () => {
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleConfirmDelete}
         title="Delete Coding Problem"
-        message="Are you sure you want to soft-delete this programming problem? It will be removed from the sandbox list for students, but past user compilation submissions will be preserved."
+        message="Are you sure you want to delete this coding problem? It will be removed from the list for students, but past submissions will be preserved."
         confirmText="Confirm Delete"
         cancelText="Cancel"
         variant="danger"

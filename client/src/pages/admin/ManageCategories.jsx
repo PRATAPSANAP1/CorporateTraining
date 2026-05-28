@@ -390,7 +390,7 @@ const ManageCategories = () => {
             options={[
               { label: 'Quantitative & Logical Aptitude', value: 'aptitude' },
               { label: 'Technical Core MCQ Subjects', value: 'technical' },
-              { label: 'Coding Sandboxed Problems', value: 'coding' }
+              { label: 'Coding Problems', value: 'coding' }
             ]}
             onChange={(e) => setCatType(e.target.value)}
           />

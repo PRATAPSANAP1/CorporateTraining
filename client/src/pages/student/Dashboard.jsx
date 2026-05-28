@@ -165,7 +165,7 @@ const Dashboard = () => {
               <Code2 className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white mb-4">Coding Sandbox</h3>
+              <h3 className="font-bold text-slate-800 dark:text-white mb-4">Coding Problems</h3>
               <Button variant="ghost" size="sm" className="text-emerald-500 hover:text-emerald-600 p-0 font-bold group">
                 Practice Code <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
               </Button>

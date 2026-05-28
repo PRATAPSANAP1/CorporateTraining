@@ -164,7 +164,7 @@ const CodingEditor = () => {
           to="/student/coding"
           className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 mr-1.5" /> Back to Sandbox Problems
+          <ChevronLeft className="w-4 h-4 mr-1.5" /> Back to Coding Problems
         </Link>
         <span className="text-xs font-bold text-slate-400">
           Earn points: <strong className="text-indigo-500">{problem.points} pts</strong>
@@ -340,7 +340,7 @@ const CodingEditor = () => {
             {/* Header controls */}
             <div className="flex items-center justify-between px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 shrink-0">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Code2 className="w-4 h-4" /> Code Sandbox
+                <Code2 className="w-4 h-4" /> Code Editor
               </span>
               <Select
                 value={language}

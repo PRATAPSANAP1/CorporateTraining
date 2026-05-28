@@ -190,7 +190,7 @@ const AddCodingProblem = () => {
           to="/admin/coding"
           className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 mr-1.5" /> Back to Sandbox list
+          <ChevronLeft className="w-4 h-4 mr-1.5" /> Back to Coding Problems
         </Link>
       </div>
 

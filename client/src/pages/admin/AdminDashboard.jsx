@@ -112,7 +112,7 @@ const AdminDashboard = () => {
           color="purple"
         />
         <StatsCard
-          title="Coding Sandbox Problems"
+          title="Coding Problems"
           value={stats.totalCodingProblems}
           icon={Code2}
           color="emerald"

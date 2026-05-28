@@ -76,7 +76,7 @@ const CodingProblems = () => {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Sandbox Library</h1>
+        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Coding Problems</h1>
       </div>
 
       {/* Stats Bar */}
