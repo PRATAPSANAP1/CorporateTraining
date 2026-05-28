@@ -23,10 +23,9 @@ const seedAdmin = async () => {
     let admin = await User.findOne({ role: 'admin' });
     
     if (admin) {
-      console.log(`Admin account found. Updating email to: ${adminData.email}`);
+      console.log(`Admin account found. Updating email and resetting password...`);
       admin.email = adminData.email;
-      // We don't update password to avoid overwriting if they changed it, 
-      // but if we want to ensure it's Admin@123 we could. Let's just update the email.
+      admin.password = adminData.password;
     } else {
       console.log('No admin found. Creating new admin account...');
       admin = new User(adminData);
