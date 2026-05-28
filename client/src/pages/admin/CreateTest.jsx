@@ -21,7 +21,6 @@ const CreateTest = () => {
   const [categories, setCategories] = useState([]);
 
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
   const [difficulty, setDifficulty] = useState('mixed');
   const [totalTime, setTotalTime] = useState(30);
   const [passingMarks, setPassingMarks] = useState(10);
@@ -65,7 +64,6 @@ const CreateTest = () => {
         const res = await adminService.getTest(id);
         const test = res.data;
         setName(test.name);
-        setDescription(test.description || '');
         setDifficulty(test.difficulty || 'mixed');
         setTotalTime(test.totalTime);
         setPassingMarks(test.passingMarks || 0);
@@ -170,7 +168,6 @@ const CreateTest = () => {
 
     const payload = {
       name: name.trim(),
-      description: description.trim(),
       category: primaryCategory,
       difficulty,
       totalTime: parseInt(totalTime, 10),
@@ -227,12 +224,6 @@ const CreateTest = () => {
           <Card hover={false} className="p-6 flex flex-col gap-5">
             <h3 className="font-bold text-slate-800 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">Basic Configuration</h3>
             <Input label="Test Name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Quantitative Reasoning Mock 1" />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
-              <textarea rows={2} value={description} onChange={e => setDescription(e.target.value)}
-                placeholder="Topics covered, marks distribution..."
-                className="w-full py-2.5 px-4 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none transition-all" />
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <Select label="Difficulty" value={difficulty}
                 options={[{ label: 'Easy', value: 'easy' }, { label: 'Medium', value: 'medium' }, { label: 'Hard', value: 'hard' }, { label: 'Mixed', value: 'mixed' }]}

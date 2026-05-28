@@ -23,14 +23,12 @@ const ManageCategories = () => {
   const [catId, setCatId] = useState(null);
   const [catName, setCatName] = useState('');
   const [catType, setCatType] = useState('aptitude');
-  const [catDesc, setCatDesc] = useState('');
   const [catSaving, setCatSaving] = useState(false);
 
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [subEditMode, setSubEditMode] = useState(false);
   const [subId, setSubId] = useState(null);
   const [subName, setSubName] = useState('');
-  const [subDesc, setSubDesc] = useState('');
   const [subSaving, setSubSaving] = useState(false);
 
   const [activeParent, setActiveParent] = useState('');
@@ -90,7 +88,6 @@ const ManageCategories = () => {
     const payload = {
       name: catName.trim(),
       type: catType,
-      description: catDesc.trim(),
     };
 
     try {
@@ -116,7 +113,6 @@ const ManageCategories = () => {
     setCatId(cat._id);
     setCatName(cat.name);
     setCatType(cat.type);
-    setCatDesc(cat.description || '');
     setCatEditMode(true);
     setCatModalOpen(true);
   };
@@ -151,7 +147,6 @@ const ManageCategories = () => {
 
     const payload = {
       name: subName.trim(),
-      description: subDesc.trim(),
     };
 
     try {
@@ -176,7 +171,6 @@ const ManageCategories = () => {
   const handleEditSubcategoryTrigger = (sub) => {
     setSubId(sub._id);
     setSubName(sub.name);
-    setSubDesc(sub.description || '');
     setSubEditMode(true);
     setSubModalOpen(true);
   };
@@ -221,7 +215,6 @@ const ManageCategories = () => {
               onClick={() => {
                 setCatName('');
                 setCatType('aptitude');
-                setCatDesc('');
                 setCatEditMode(false);
                 setCatModalOpen(true);
               }}
@@ -282,11 +275,7 @@ const ManageCategories = () => {
                     </div>
                   </div>
 
-                  {cat.description && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-4 leading-relaxed line-clamp-2 pl-12 border-l border-slate-100 dark:border-slate-800/40">
-                      {cat.description}
-                    </p>
-                  )}
+
                 </Card>
               );
             })}
@@ -304,7 +293,6 @@ const ManageCategories = () => {
               disabled={!activeParent}
               onClick={() => {
                 setSubName('');
-                setSubDesc('');
                 setSubEditMode(false);
                 setSubModalOpen(true);
               }}
@@ -333,7 +321,6 @@ const ManageCategories = () => {
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                       <th className="px-6 py-3">Topic Title</th>
-                      <th className="px-6 py-3">Description</th>
                       <th className="px-6 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -341,7 +328,6 @@ const ManageCategories = () => {
                     {subcategories.map((sub) => (
                       <tr key={sub._id} className="hover:bg-slate-50/20">
                         <td className="px-6 py-3 font-extrabold">{sub.name}</td>
-                        <td className="px-6 py-3 text-slate-400 max-w-[150px] truncate">{sub.description || '--'}</td>
                         <td className="px-6 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
@@ -395,17 +381,6 @@ const ManageCategories = () => {
             onChange={(e) => setCatType(e.target.value)}
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
-            <textarea
-              rows={3}
-              value={catDesc}
-              onChange={(e) => setCatDesc(e.target.value)}
-              placeholder="Summary of subjects or preparation target included..."
-              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
-            />
-          </div>
-
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => setCatModalOpen(false)}>
               Cancel
@@ -431,17 +406,6 @@ const ManageCategories = () => {
             onChange={(e) => setSubName(e.target.value)}
             placeholder="e.g. Speed, Time & Distance"
           />
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
-            <textarea
-              rows={3}
-              value={subDesc}
-              onChange={(e) => setSubDesc(e.target.value)}
-              placeholder="e.g. Covers relative speeds, train problems, and circular paths."
-              className="w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/80 focus:border-indigo-500 focus:outline-none"
-            />
-          </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => setSubModalOpen(false)}>
