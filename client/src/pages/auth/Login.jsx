@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, GraduationCap, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { login } from '../../store/slices/authSlice';
 
@@ -11,29 +11,27 @@ const Login = () => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector(state => state.auth || {});
 
-    const [formData, setFormData] = useState({
-  email: '',
-  password: ''
-});
+  const [role, setRole] = useState('student'); // 'student' | 'admin'
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
+    if (isAuthenticated) navigate('/dashboard');
   }, [isAuthenticated, navigate]);
 
+  // Clear form when switching roles
+  const handleRoleSwitch = (newRole) => {
+    setRole(newRole);
+    setFormData({ email: '', password: '' });
+    setErrors({});
+  };
+
   const handleChange = e => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const validate = () => {
@@ -57,19 +55,40 @@ const Login = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      await dispatch(login({ email: formData.email, password: formData.password })).unwrap();
-      toast.success('Welcome back!');
+      const result = await dispatch(login({ email: formData.email, password: formData.password })).unwrap();
+      // Validate role matches
+      if (role === 'admin' && result?.user?.role !== 'admin') {
+        toast.error('Access denied. This account is not an admin.');
+        return;
+      }
+      if (role === 'student' && result?.user?.role === 'admin') {
+        toast.error('Please use the Admin login tab.');
+        return;
+      }
+      toast.success(`Welcome back, ${result?.user?.name?.split(' ')[0] || 'User'}!`);
     } catch (err) {
-      const message = err?.message || err || 'Login failed. Please try again.';
-      toast.error(message);
+      toast.error(err?.message || err || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const isAdmin = role === 'admin';
+
+  const activeTab = isAdmin
+    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+    : 'bg-blue-600 text-white shadow-md shadow-blue-500/30';
+
+  const btnClass = isAdmin
+    ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+    : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+
+  const ringClass = isAdmin ? 'focus:ring-indigo-500' : 'focus:ring-blue-500';
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8">
+      <div className="w-full max-w-md">
+        {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-6">
           <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-12 h-12 object-contain rounded-xl bg-white border border-slate-100 dark:border-slate-700 shadow-sm" />
           <div>
@@ -77,81 +96,132 @@ const Login = () => {
             <span className="text-[10px] text-slate-500 font-medium">Placement Preparation Portal</span>
           </div>
         </div>
-        <h2 className="text-center text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">Sign in to continue</h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className={`w-5 h-5 ${errors.email ? 'text-red-400' : 'text-slate-400'}`} />
-              </div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ${errors.email ? 'border-red-500' : 'border-slate-300'}`}
-              />
-            </div>
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className={`w-5 h-5 ${errors.password ? 'text-red-400' : 'text-slate-400'}`} />
-              </div>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
-                ref={passwordInputRef}
-                placeholder="Enter your password"
-                className={`w-full pl-10 pr-12 py-2.5 rounded-xl border bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ${errors.password ? 'border-red-500' : 'border-slate-300'}`}
-              />
-              <button
-                type="button"
-                onMouseDown={e => e.preventDefault()}
-                onClick={() => {
-                  setShowPassword(!showPassword);
-                  setTimeout(() => {
-                    passwordInputRef.current?.focus();
-                  }, 0);
-                }}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-          </div>
 
+        {/* Role Toggle */}
+        <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
+            type="button"
+            onClick={() => handleRoleSwitch('student')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              !isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
           >
-            {loading ? (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            ) : (
-              <>
-                <LogIn className="w-5 h-5" /> Sign In
-              </>
-            )}
+            <GraduationCap className="w-4 h-4" />
+            Student
           </button>
-        </form>
-        <div className="mt-6 text-center text-sm">
-          <span className="text-slate-600">New to OIT_STACK? </span>
-          <Link to="/register" className="text-indigo-600 hover:underline font-medium">Create an account</Link>
+          <button
+            type="button"
+            onClick={() => handleRoleSwitch('admin')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            Admin
+          </button>
+        </div>
+
+        {/* Card */}
+        <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl border transition-all duration-300 p-8 ${
+          isAdmin ? 'border-indigo-500/20 shadow-indigo-500/5' : 'border-slate-100 dark:border-slate-800'
+        }`}>
+          {/* Admin badge */}
+          {isAdmin && (
+            <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2 mb-5">
+              <Shield className="w-4 h-4 text-indigo-500 shrink-0" />
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                Admin access only. Unauthorized login is prohibited.
+              </p>
+            </div>
+          )}
+
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-5">
+            {isAdmin ? 'Admin Sign In' : 'Student Sign In'}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+              <div className="relative">
+                <Mail className={`absolute left-3 top-2.5 w-4 h-4 pointer-events-none ${errors.email ? 'text-red-400' : 'text-slate-400'}`} />
+                <input
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder={isAdmin ? 'admin@oitstack.com' : 'you@example.com'}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition text-sm ${
+                    errors.email ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'
+                  } ${ringClass}`}
+                />
+              </div>
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <div className="relative">
+                <Lock className={`absolute left-3 top-2.5 w-4 h-4 pointer-events-none ${errors.password ? 'text-red-400' : 'text-slate-400'}`} />
+                <input
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  ref={passwordInputRef}
+                  placeholder="Enter your password"
+                  className={`w-full pl-10 pr-12 py-2.5 rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition text-sm ${
+                    errors.password ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'
+                  } ${ringClass}`}
+                />
+                <button
+                  type="button"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => { setShowPassword(!showPassword); setTimeout(() => passwordInputRef.current?.focus(), 0); }}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+            </div>
+
+            {/* Forgot password */}
+            {!isAdmin && (
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-xs text-blue-500 hover:underline">Forgot password?</Link>
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${btnClass}`}
+            >
+              {loading ? (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                <>
+                  {isAdmin ? <Shield className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+                  {isAdmin ? 'Sign In as Admin' : 'Sign In'}
+                </>
+              )}
+            </button>
+          </form>
+
+          {!isAdmin && (
+            <p className="mt-5 text-center text-sm text-slate-500">
+              New to OIT_STACK?{' '}
+              <Link to="/register" className="text-blue-600 hover:underline font-medium">Create an account</Link>
+            </p>
+          )}
         </div>
       </div>
     </div>
