@@ -17,7 +17,7 @@ const seedAdmin = async () => {
 
     const admin = new User({
       name: 'OIT_STACK Admin',
-      email: 'admin@oit_stack.com',
+      email: 'admin@oitstack.com',
       password: 'Admin@123',
       role: 'admin',
       college: 'OIT_STACK',
@@ -29,7 +29,7 @@ const seedAdmin = async () => {
     await admin.save();
     console.log(' Default Admin account created successfully!');
     console.log('Credentials:');
-    console.log('  Email:    admin@oit_stack.com');
+    console.log('  Email:    admin@oitstack.com');
     console.log('  Password: Admin@123');
 
     await Leaderboard.create({ user: admin._id });
