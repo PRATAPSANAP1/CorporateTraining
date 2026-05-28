@@ -17,7 +17,6 @@ const router = express.Router();
 
 const testValidation = [
   body('name').trim().notEmpty().withMessage('Test name is required'),
-  body('category').isMongoId().withMessage('Category ID is required and must be valid'),
   body('questions').isArray({ min: 1 }).withMessage('At least one question is required'),
   body('totalTime').isInt({ min: 1 }).withMessage('Total time in minutes is required'),
 ];

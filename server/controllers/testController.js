@@ -158,8 +158,12 @@ const startTest = async (req, res) => {
         select: '-correctAnswer -explanation', // Exclude answers and explanations
       });
 
-    if (!test || !test.isActive) {
-      return errorResponse(res, 404, 'Test not found or inactive');
+    if (!test) {
+      return errorResponse(res, 404, 'Test not found');
+    }
+
+    if (!test.isActive) {
+      return errorResponse(res, 403, 'This test is currently inactive');
     }
 
     const now = new Date();

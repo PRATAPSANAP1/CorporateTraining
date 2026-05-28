@@ -13,7 +13,6 @@ const testSchema = new mongoose.Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
-      required: [true, 'Category is required'],
     },
     subcategory: {
       type: mongoose.Schema.Types.ObjectId,

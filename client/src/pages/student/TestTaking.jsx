@@ -58,8 +58,9 @@ const TestTaking = () => {
           }
         }
       } catch (err) {
-        console.error('Error starting test:', err.message);
-        toast.error('Failed to start test session. Please try again.');
+        console.error('Error starting test:', err);
+        const msg = err.response?.data?.message || err.message || 'Failed to start test session. Please try again.';
+        toast.error(msg);
         navigate(`/student/tests/${id}`);
       } finally {
         setLoading(false);
