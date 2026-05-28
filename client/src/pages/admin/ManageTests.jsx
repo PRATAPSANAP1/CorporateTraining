@@ -12,7 +12,7 @@ import EmptyState from '../../components/common/EmptyState';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import TableSkeleton from '../../components/skeletons/TableSkeleton';
 
-const ManageTests = () => {
+const ManageTests = ({ defaultCategoryName, hideHeader }) => {
   const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -54,12 +54,16 @@ const ManageTests = () => {
         const res = await adminService.getCategories();
         const opts = res.data.map(c => ({ label: c.name, value: c._id }));
         setCategories(opts);
+        if (defaultCategoryName) {
+          const match = res.data.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
+          if (match) setSelectedCategory(match._id);
+        }
       } catch (err) {
         console.error('Error loading categories:', err);
       }
     };
     loadCategories();
-  }, []);
+  }, [defaultCategoryName]);
 
   useEffect(() => {
     fetchTestsList();
@@ -105,21 +109,38 @@ const ManageTests = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white">Active Placement Tests</h1>
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 dark:text-white">Active Placement Tests</h1>
+          </div>
+  
+          <Button
+            variant="primary"
+            size="sm"
+            icon={PlusCircle}
+            onClick={() => navigate(`/admin/tests/create${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+            className="font-bold text-xs"
+          >
+            Create Test
+          </Button>
         </div>
+      )}
 
-        <Button
-          variant="primary"
-          size="sm"
-          icon={PlusCircle}
-          onClick={() => navigate('/admin/tests/create')}
-          className="font-bold text-xs"
-        >
-          Create Test
-        </Button>
-      </div>
+      {/* When hideHeader is true, we still need a Create Test button somewhere, perhaps inline with filters */}
+      {hideHeader && (
+        <div className="flex justify-end">
+          <Button
+            variant="primary"
+            size="sm"
+            icon={PlusCircle}
+            onClick={() => navigate(`/admin/tests/create${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+            className="font-bold text-xs"
+          >
+            Create Test
+          </Button>
+        </div>
+      )}
 
       {/* Filters Card */}
       <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4" hover={false}>
@@ -129,13 +150,15 @@ const ManageTests = () => {
           onChange={setSearch}
         />
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Select
-            placeholder="All Categories"
-            value={selectedCategory}
-            options={categories}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-48"
-          />
+          {!defaultCategoryName && (
+            <Select
+              placeholder="All Categories"
+              value={selectedCategory}
+              options={categories}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-48"
+            />
+          )}
           <Select
             placeholder="All Difficulties"
             value={difficulty}

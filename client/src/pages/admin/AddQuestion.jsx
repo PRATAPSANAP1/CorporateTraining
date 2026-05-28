@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Save, ChevronLeft, Plus, Trash2, HelpCircle, Eye } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import adminService from '../../services/adminService';
@@ -12,6 +12,7 @@ import Loader from '../../components/common/Loader';
 const AddQuestion = () => {
   const { id } = useParams(); // exists in edit mode
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEdit = !!id;
 
   const [loading, setLoading] = useState(false);
@@ -35,12 +36,19 @@ const AddQuestion = () => {
       try {
         const res = await adminService.getCategories();
         setCategories(res.data || []);
+        
+        if (!isEdit) {
+          const defaultCat = searchParams.get('category');
+          if (defaultCat) {
+            setCategory(defaultCat);
+          }
+        }
       } catch (err) {
         console.error('Error fetching categories:', err);
       }
     };
     loadCategories();
-  }, []);
+  }, [isEdit, searchParams]);
 
   useEffect(() => {
     if (!category) {

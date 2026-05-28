@@ -42,6 +42,7 @@ import AddCodingProblem from './pages/admin/AddCodingProblem';
 import ManageCategories from './pages/admin/ManageCategories';
 import ViewResults from './pages/admin/ViewResults';
 import Analytics from './pages/admin/Analytics';
+import AdminSubjectHub from './pages/admin/AdminSubjectHub';
 
 function App() {
   const dispatch = useDispatch();
@@ -131,12 +132,17 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="students" element={<ManageStudents />} />
-          <Route path="questions" element={<ManageQuestions />} />
+          <Route path="aptitude/:subject" element={<AdminSubjectHub group="aptitude" />} />
+          <Route path="technical/:subject" element={<AdminSubjectHub group="technical" />} />
+          
+          <Route path="questions" element={<Navigate to="/admin/aptitude/math" replace />} />
           <Route path="questions/add" element={<AddQuestion />} />
           <Route path="questions/edit/:id" element={<AddQuestion />} />
-          <Route path="tests" element={<ManageTests />} />
+          
+          <Route path="tests" element={<Navigate to="/admin/aptitude/math" replace />} />
           <Route path="tests/create" element={<CreateTest />} />
           <Route path="tests/edit/:id" element={<CreateTest />} />
+          
           <Route path="coding" element={<ManageCodingProblems />} />
           <Route path="coding/add" element={<AddCodingProblem />} />
           <Route path="coding/edit/:id" element={<AddCodingProblem />} />

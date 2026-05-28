@@ -13,7 +13,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import Modal from '../../components/common/Modal';
 import TableSkeleton from '../../components/skeletons/TableSkeleton';
 
-const ManageQuestions = () => {
+const ManageQuestions = ({ defaultCategoryName, hideHeader }) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -56,12 +56,16 @@ const ManageQuestions = () => {
         const res = await adminService.getCategories();
         const opts = res.data.map(c => ({ label: c.name, value: c._id }));
         setCategories(opts);
+        if (defaultCategoryName) {
+          const match = res.data.find(c => c.name.toLowerCase() === defaultCategoryName.toLowerCase());
+          if (match) setSelectedCategory(match._id);
+        }
       } catch (err) {
         console.error('Error loading categories:', err);
       }
     };
     loadCategories();
-  }, []);
+  }, [defaultCategoryName]);
 
   useEffect(() => {
     fetchQuestionsList();
@@ -141,15 +145,40 @@ const ManageQuestions = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white">Questions Repository</h1>
-          {questions.length > 0 && (
-            <p className="text-sm text-slate-400 mt-0.5">{questions.length} questions found</p>
-          )}
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 dark:text-white">Questions Repository</h1>
+            {questions.length > 0 && (
+              <p className="text-sm text-slate-400 mt-0.5">{questions.length} questions found</p>
+            )}
+          </div>
+  
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              icon={FileSpreadsheet}
+              onClick={() => setBulkOpen(true)}
+              className="font-bold text-xs"
+            >
+              Bulk Import JSON
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={PlusCircle}
+              onClick={() => navigate(`/admin/questions/add${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
+              className="font-bold text-xs"
+            >
+              Add Question
+            </Button>
+          </div>
         </div>
+      )}
 
-        <div className="flex items-center gap-3">
+      {hideHeader && (
+        <div className="flex justify-end gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -163,13 +192,13 @@ const ManageQuestions = () => {
             variant="primary"
             size="sm"
             icon={PlusCircle}
-            onClick={() => navigate('/admin/questions/add')}
+            onClick={() => navigate(`/admin/questions/add${selectedCategory ? `?category=${selectedCategory}` : ''}`)}
             className="font-bold text-xs"
           >
             Add Question
           </Button>
         </div>
-      </div>
+      )}
 
       {/* Filters Card */}
       <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4" hover={false}>
@@ -179,13 +208,15 @@ const ManageQuestions = () => {
           onChange={setSearch}
         />
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Select
-            placeholder="All Categories"
-            value={selectedCategory}
-            options={categories}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-48"
-          />
+          {!defaultCategoryName && (
+            <Select
+              placeholder="All Categories"
+              value={selectedCategory}
+              options={categories}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-48"
+            />
+          )}
           <Select
             placeholder="All Difficulties"
             value={difficulty}

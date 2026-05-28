@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Maximize, Minimize } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, Maximize, Minimize, LogOut, ClipboardList } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import testService from '../../services/testService';
 import Card from '../../components/common/Card';
@@ -22,6 +22,8 @@ const TestTaking = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [exitOpen, setExitOpen] = useState(false);
 
   const containerRef = useRef(null);
   const timerRef = useRef(null);
@@ -136,6 +138,12 @@ const TestTaking = () => {
         }
       };
     });
+  };
+
+  const handleExit = () => {
+    clearInterval(timerRef.current);
+    localStorage.removeItem(`test_taking_${id}`);
+    navigate(`/student/tests/${id}`);
   };
 
   const handleAutoSubmit = async () => {

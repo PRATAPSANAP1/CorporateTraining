@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Save, ChevronLeft, Plus, Loader2, Trash2, ChevronDown, ChevronUp, Shuffle, Hash } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import adminService from '../../services/adminService';
@@ -14,6 +14,7 @@ const newSection = () => ({ id: Date.now(), category: '', count: 10, pool: [], l
 const CreateTest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEdit = !!id;
 
   const [loading, setLoading] = useState(false);
@@ -39,9 +40,32 @@ const CreateTest = () => {
 
   useEffect(() => {
     adminService.getCategories()
-      .then(res => setCategories(res.data || []))
+      .then(res => {
+        setCategories(res.data || []);
+        if (!isEdit) {
+          const defaultCat = searchParams.get('category');
+          if (defaultCat) {
+            setSections(prev => {
+              const updated = [...prev];
+              updated[0] = { ...updated[0], category: defaultCat };
+              return updated;
+            });
+            // Let the category change handler logic handle loading the pool or do it explicitly here:
+            // But to avoid stale closures, we can just let it run.
+          }
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [isEdit, searchParams]);
+
+  useEffect(() => {
+    if (!isEdit) {
+      const defaultCat = searchParams.get('category');
+      if (defaultCat && sections.length > 0 && sections[0].id && !sections[0].pool.length && !sections[0].loadingPool && sections[0].category === defaultCat) {
+        loadPoolForSection(sections[0].id, defaultCat);
+      }
+    }
+  }, [isEdit, searchParams, sections, loadPoolForSection]);
 
   const loadPoolForSection = useCallback(async (sectionId, categoryId) => {
     if (!categoryId) return;
