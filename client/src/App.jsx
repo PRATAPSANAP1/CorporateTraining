@@ -22,6 +22,8 @@ import TestTaking from './pages/student/TestTaking';
 import TestResult from './pages/student/TestResult';
 import CodingProblems from './pages/student/CodingProblems';
 import CodingEditor from './pages/student/CodingEditor';
+import AptitudeHub from './pages/student/AptitudeHub';
+import TechnicalHub from './pages/student/TechnicalHub';
 import InterviewSetup from './pages/student/InterviewSetup';
 import InterviewSession from './pages/student/InterviewSession';
 import InterviewResult from './pages/student/InterviewResult';
@@ -85,6 +87,8 @@ function App() {
         >
           <Route index element={<Navigate to="/student/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="aptitude/:subject" element={<AptitudeHub />} />
+          <Route path="technical/:section" element={<TechnicalHub />} />
           <Route path="tests" element={<TestList />} />
           <Route path="tests/:id" element={<TestStart />} />
           <Route path="tests/:id/result" element={<TestResult />} />
