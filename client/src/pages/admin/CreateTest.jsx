@@ -62,15 +62,6 @@ const CreateTest = () => {
       .catch(() => {});
   }, [isEdit, searchParams]);
 
-  useEffect(() => {
-    if (!isEdit) {
-      const defaultCat = searchParams.get('category');
-      if (defaultCat && sections.length > 0 && sections[0].id && !sections[0].pool.length && !sections[0].loadingPool && sections[0].category === defaultCat) {
-        loadPoolForSection(sections[0].id, defaultCat);
-      }
-    }
-  }, [isEdit, searchParams, sections, loadPoolForSection]);
-
   const loadPoolForSection = useCallback(async (sectionId, categoryId) => {
     if (!categoryId) return;
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, loadingPool: true, pool: [] } : s));
@@ -82,6 +73,15 @@ const CreateTest = () => {
       setSections(prev => prev.map(s => s.id === sectionId ? { ...s, loadingPool: false } : s));
     }
   }, []);
+
+  useEffect(() => {
+    if (!isEdit) {
+      const defaultCat = searchParams.get('category');
+      if (defaultCat && sections.length > 0 && sections[0].id && !sections[0].pool.length && !sections[0].loadingPool && sections[0].category === defaultCat) {
+        loadPoolForSection(sections[0].id, defaultCat);
+      }
+    }
+  }, [isEdit, searchParams, sections, loadPoolForSection]);
 
   // Edit mode
   useEffect(() => {
