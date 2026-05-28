@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import {
@@ -122,11 +123,11 @@ const AdminLayout = () => {
             <button onClick={toggleDark} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
               {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-gray-500" />}
             </button>
-            <button className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors relative">
+            <button onClick={() => toast('No new notifications', { icon: '🔔' })} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors relative">
               <Bell className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />
             </button>
-            <button className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+            <button onClick={() => toast('Admin settings coming soon', { icon: '⚙️' })} className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
               <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
