@@ -21,14 +21,10 @@ const navStructure = [
     single: true,
   },
   {
-    label: 'Aptitude',
+    label: 'Aptitude Hub',
+    path: '/student/aptitude',
     icon: Brain,
-    color: 'text-blue-500',
-    children: [
-      { label: 'Math', path: '/student/aptitude/math', icon: Calculator },
-      { label: 'Verbal', path: '/student/aptitude/verbal', icon: AlignLeft },
-      { label: 'Non-Verbal', path: '/student/aptitude/non-verbal', icon: Shapes },
-    ],
+    single: true,
   },
   {
     label: 'Technical',

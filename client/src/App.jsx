@@ -88,7 +88,7 @@ function App() {
         >
           <Route index element={<Navigate to="/student/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="aptitude/:subject" element={<AptitudeHub />} />
+          <Route path="aptitude" element={<AptitudeHub />} />
           <Route path="technical/:section" element={<TechnicalHub />} />
           <Route path="tests" element={<TestList />} />
           <Route path="tests/:id" element={<TestStart />} />

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Calculator, AlignLeft, Shapes, Clock, HelpCircle, Trophy, ChevronRight, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Brain, Clock, HelpCircle, Trophy, ChevronRight, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import testService from '../../services/testService';
 import categoryService from '../../services/categoryService';
@@ -9,20 +9,11 @@ import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import CardSkeleton from '../../components/skeletons/CardSkeleton';
 
-const subjectMap = {
-  math: { label: 'Math', icon: Calculator, color: 'from-blue-500 to-blue-600', glow: 'shadow-blue-500/20', desc: 'Quantitative aptitude, arithmetic, algebra & number systems' },
-  verbal: { label: 'Verbal', icon: AlignLeft, color: 'from-indigo-500 to-indigo-600', glow: 'shadow-indigo-500/20', desc: 'Reading comprehension, vocabulary, grammar & verbal reasoning' },
-  'non-verbal': { label: 'Non-Verbal', icon: Shapes, color: 'from-purple-500 to-violet-600', glow: 'shadow-purple-500/20', desc: 'Pattern recognition, spatial reasoning & logical diagrams' },
-};
-
 const AptitudeHub = () => {
-  const { subject } = useParams(); // math | verbal | non-verbal
   const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
-
-  const info = subjectMap[subject];
 
   useEffect(() => {
     categoryService.getCategories()
@@ -31,23 +22,12 @@ const AptitudeHub = () => {
   }, []);
 
   useEffect(() => {
-    if (!subject) return;
     const load = async () => {
       try {
         setLoading(true);
-        // Find category matching subject label or type=aptitude
         const res = await testService.getTests({ limit: 100 });
         const all = Array.isArray(res.data) ? res.data : [];
-        // Filter by subject keyword in name or category name
-        const keyword = info?.label?.toLowerCase() || subject.toLowerCase();
-        const filtered = all.filter(t => {
-          const catName = (t.category?.name || '').toLowerCase();
-          const testName = (t.name || '').toLowerCase();
-          return catName.includes(keyword) || testName.includes(keyword) ||
-            (t.category?.type === 'aptitude');
-        });
-        // If no keyword match, show all aptitude tests
-        setTests(filtered.length > 0 ? filtered : all.filter(t => t.category?.type === 'aptitude'));
+        setTests(all.filter(t => t.category?.type === 'aptitude'));
       } catch {
         toast.error('Failed to load tests');
       } finally {
@@ -55,42 +35,19 @@ const AptitudeHub = () => {
       }
     };
     load();
-  }, [subject, info]);
-
-  if (!info) { navigate('/student/dashboard'); return null; }
-
-  const Icon = info.icon;
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${info.color} flex items-center justify-center shadow-lg ${info.glow} shrink-0`}>
-          <Icon className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+          <Brain className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">Aptitude — {info.label}</h1>
-          <p className="text-sm text-slate-400 mt-0.5">{info.desc}</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">Aptitude Tests</h1>
+          <p className="text-sm text-slate-400 mt-0.5">Practice aptitude, verbal, and logical reasoning tests</p>
         </div>
-      </div>
-
-      {/* Other subjects quick nav */}
-      <div className="flex gap-3 flex-wrap">
-        {Object.entries(subjectMap).map(([key, val]) => {
-          const SubIcon = val.icon;
-          const active = key === subject;
-          return (
-            <button key={key} onClick={() => navigate(`/student/aptitude/${key}`)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
-                active
-                  ? `bg-gradient-to-r ${val.color} text-white border-transparent shadow-md`
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
-              }`}>
-              <SubIcon className="w-4 h-4" />
-              {val.label}
-            </button>
-          );
-        })}
       </div>
 
       {/* Tests */}
@@ -101,7 +58,7 @@ const AptitudeHub = () => {
       ) : tests.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <AlertCircle className="w-10 h-10 text-slate-300 dark:text-slate-700" />
-          <p className="text-slate-400 font-medium">No tests available for {info.label} yet.</p>
+          <p className="text-slate-400 font-medium">No tests available for Aptitude yet.</p>
           <p className="text-xs text-slate-400">Ask your admin to create tests under this category.</p>
         </div>
       ) : (
