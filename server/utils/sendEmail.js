@@ -19,6 +19,14 @@ const sendEmail = async ({ to, subject, html }) => {
       },
     });
 
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error("SMTP ERROR:", error);
+      } else {
+        console.log("SMTP READY");
+      }
+    });
+
     const mailOptions = {
       from: `"OIT_STACK" <${config.email.user}>`,
       to,
