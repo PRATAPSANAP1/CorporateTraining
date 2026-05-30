@@ -3,6 +3,12 @@ const config = require('../config/env');
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
+    if (!config.email.user || !config.email.pass) {
+      console.warn(`[Mock Email] To: ${to} | Subject: ${subject}`);
+      console.warn(`[Mock Email] Content: \n${html}`);
+      return { messageId: 'mock-id-1234' };
+    }
+
     const transporter = nodemailer.createTransport({
       host: config.email.host,
       port: config.email.port,
