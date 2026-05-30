@@ -90,8 +90,8 @@ const Login = () => {
       {/* Navbar */}
       <nav className="h-14 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.jpg" alt="OIT_STACK" className="w-7 h-7 object-contain rounded-lg border border-slate-100 dark:border-slate-700" />
-          <span className="font-bold text-slate-900 dark:text-white text-sm">OIT_STACK</span>
+          <img src="/logo.jpg" alt="OIT_STACK" className="w-10 h-10 object-contain rounded-lg border border-slate-100 dark:border-slate-700" />
+          <span className="font-bold text-slate-900 dark:text-white text-base">OIT_STACK</span>
         </div>
         <button
           onClick={() => {
