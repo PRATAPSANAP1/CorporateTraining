@@ -11,7 +11,6 @@ const Login = () => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector(state => state.auth || {});
 
-  const [role, setRole] = useState('student'); // 'student' | 'admin'
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,13 +19,6 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard');
   }, [isAuthenticated, navigate]);
-
-  // Clear form when switching roles
-  const handleRoleSwitch = (newRole) => {
-    setRole(newRole);
-    setFormData({ email: '', password: '' });
-    setErrors({});
-  };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -56,15 +48,6 @@ const Login = () => {
     setLoading(true);
     try {
       const result = await dispatch(login({ email: formData.email, password: formData.password })).unwrap();
-      // Validate role matches
-      if (role === 'admin' && result?.user?.role !== 'admin') {
-        toast.error('Access denied. This account is not an admin.');
-        return;
-      }
-      if (role === 'student' && result?.user?.role === 'admin') {
-        toast.error('Please use the Admin login tab.');
-        return;
-      }
       toast.success(`Welcome back, ${result?.user?.name?.split(' ')[0] || 'User'}!`);
     } catch (err) {
       toast.error(err?.message || err || 'Login failed. Please try again.');
@@ -73,17 +56,8 @@ const Login = () => {
     }
   };
 
-  const isAdmin = role === 'admin';
-
-  const activeTab = isAdmin
-    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
-    : 'bg-blue-600 text-white shadow-md shadow-blue-500/30';
-
-  const btnClass = isAdmin
-    ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
-    : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
-
-  const ringClass = isAdmin ? 'focus:ring-indigo-500' : 'focus:ring-blue-500';
+  const btnClass = 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+  const ringClass = 'focus:ring-blue-500';
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -114,33 +88,7 @@ const Login = () => {
 
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className={`w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border transition-all duration-300 p-6 sm:p-8 ${
-          isAdmin ? 'border-indigo-500/20 shadow-indigo-500/5' : 'border-slate-100 dark:border-slate-800'
-        }`}>
-
-          {/* Role Toggle inside card */}
-          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('student')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                !isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              <GraduationCap className="w-4 h-4" />
-              Student
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('admin')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                isAdmin ? activeTab : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Admin
-            </button>
-          </div>
+        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 transition-all duration-300 p-6 sm:p-8">
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
@@ -192,12 +140,9 @@ const Login = () => {
               {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
             </div>
 
-            {/* Forgot password */}
-            {!isAdmin && (
-              <div className="text-right">
-                <Link to="/forgot-password" className="text-xs text-blue-500 hover:underline">Forgot password?</Link>
-              </div>
-            )}
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-blue-500 hover:underline">Forgot password?</Link>
+            </div>
 
             {/* Submit */}
             <button
@@ -212,19 +157,17 @@ const Login = () => {
                 </svg>
               ) : (
                 <>
-                  {isAdmin ? <Shield className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
-                  {isAdmin ? 'Sign In as Admin' : 'Sign In'}
+                  <LogIn className="w-4 h-4" />
+                  Sign In
                 </>
               )}
             </button>
           </form>
 
-          {!isAdmin && (
-            <p className="mt-5 text-center text-sm text-slate-500">
-              New to OIT_STACK?{' '}
-              <Link to="/register" className="text-blue-600 hover:underline font-medium">Create an account</Link>
-            </p>
-          )}
+          <p className="mt-5 text-center text-sm text-slate-500">
+            New to OIT_STACK?{' '}
+            <Link to="/register" className="text-blue-600 hover:underline font-medium">Create an account</Link>
+          </p>
         </div>
       </div>
       </div>
