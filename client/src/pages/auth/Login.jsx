@@ -86,9 +86,9 @@ const Login = () => {
   const ringClass = isAdmin ? 'focus:ring-indigo-500' : 'focus:ring-blue-500';
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="h-[100dvh] overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col">
       {/* Navbar */}
-      <nav className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-6">
+      <nav className="h-14 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
           <img src="/logo.jpg" alt="OIT_STACK" className="w-7 h-7 object-contain rounded-lg border border-slate-100 dark:border-slate-700" />
           <span className="font-bold text-slate-900 dark:text-white text-sm">OIT_STACK</span>
@@ -106,7 +106,7 @@ const Login = () => {
         </button>
       </nav>
 
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
         
         <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-6 text-center">
           Sign In
