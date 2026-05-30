@@ -106,16 +106,17 @@ const Login = () => {
         </button>
       </nav>
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] p-4">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-4">
+        
+        <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-6 text-center">
+          Sign In
+        </h2>
+
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-xl border transition-all duration-300 p-8 ${
+        <div className={`w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border transition-all duration-300 p-6 sm:p-8 ${
           isAdmin ? 'border-indigo-500/20 shadow-indigo-500/5' : 'border-slate-100 dark:border-slate-800'
         }`}>
-
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-5">
-            {isAdmin ? 'Admin Sign In' : 'Student Sign In'}
-          </h2>
 
           {/* Role Toggle inside card */}
           <div className="flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 mb-6 gap-1">
