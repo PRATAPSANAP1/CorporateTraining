@@ -146,9 +146,29 @@ const Register = () => {
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950">
-      {/* Left Panel — Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950">
+      {/* Navbar */}
+      <nav className="h-14 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-6 z-50 relative">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo.jpg" alt="OIT_STACK" className="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm" />
+          <span className="font-bold text-slate-900 dark:text-white text-lg">OIT_STACK</span>
+        </div>
+        <button
+          onClick={() => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          }}
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+      </nav>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel — Decorative */}
+        <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#2e1065]" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDJ2LTJoMzR6bTAtMzBWMkgydjJoMzR6TTIgMjBoMzR2Mkgydi0yem0wIDEyaDM0djJIMnYtMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
 
@@ -218,11 +238,6 @@ const Register = () => {
       {/* Right Panel — Register Form */}
       <div className="w-full lg:w-1/2 xl:w-[45%] flex items-center justify-center p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <img src="/logo.jpg" alt="OIT_STACK Logo" className="w-12 h-12 object-contain rounded-xl shadow-md bg-white border border-slate-100 dark:border-slate-800" />
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">OIT_STACK</h1>
-          </div>
 
           {/* Step Indicator - Mobile */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
@@ -494,6 +509,7 @@ const Register = () => {
             </Link>
           </p>
         </div>
+      </div>
       </div>
     </div>
   );
