@@ -208,7 +208,7 @@ const forgotPassword = async (req, res) => {
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
 
-      return errorResponse(res, 500, 'Failed to send reset email. Please try again later.');
+      return errorResponse(res, 500, `Failed to send reset email: ${emailError.message}`);
     }
   } catch (error) {
     console.error('Forgot password error:', error.message);
