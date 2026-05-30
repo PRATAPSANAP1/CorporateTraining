@@ -29,6 +29,7 @@ const CreateTest = () => {
   const [negativeMarkValue, setNegativeMarkValue] = useState(0.25);
   const [randomizeQuestions, setRandomizeQuestions] = useState(true);
   const [shuffleOptions, setShuffleOptions] = useState(false);
+  const [isDynamic, setIsDynamic] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -99,6 +100,7 @@ const CreateTest = () => {
         setNegativeMarkValue(test.negativeMarkValue || 0.25);
         setRandomizeQuestions(test.randomizeQuestions !== undefined ? test.randomizeQuestions : true);
         setShuffleOptions(test.shuffleOptions || false);
+        setIsDynamic(test.isDynamic || false);
         setIsActive(test.isActive !== undefined ? test.isActive : true);
         if (test.startDate) setStartDate(new Date(test.startDate).toISOString().slice(0, 16));
         if (test.endDate) setEndDate(new Date(test.endDate).toISOString().slice(0, 16));
@@ -115,16 +117,32 @@ const CreateTest = () => {
         const builtSections = Object.entries(catMap).map(([catId, qs]) => ({
           id: Date.now() + Math.random(),
           category: catId,
-          mode: 'manual', // default to manual when editing to preserve exact questions
+          mode: test.isDynamic ? 'automatic' : 'manual',
           count: qs.length,
           selectedQuestions: qs,
           pool: [],
           loadingPool: false,
           expanded: true,
         }));
-
-        setSections(builtSections.length > 0 ? builtSections : [newSection()]);
-        builtSections.forEach(s => loadPoolForSection(s.id, s.category));
+        
+        // If it's dynamic, reconstruct from dynamicConfig instead
+        if (test.isDynamic && test.dynamicConfig && test.dynamicConfig.length > 0) {
+          const dynSections = test.dynamicConfig.map((cfg, i) => ({
+            id: Date.now() + i,
+            category: cfg.category?._id || cfg.category || '',
+            mode: 'automatic',
+            count: cfg.count,
+            selectedQuestions: [],
+            pool: [],
+            loadingPool: false,
+            expanded: true,
+          }));
+          setSections(dynSections.length > 0 ? dynSections : [newSection()]);
+          dynSections.forEach(s => loadPoolForSection(s.id, s.category));
+        } else {
+          setSections(builtSections.length > 0 ? builtSections : [newSection()]);
+          builtSections.forEach(s => loadPoolForSection(s.id, s.category));
+        }
       } catch {
         toast.error('Failed to load test details.');
         navigate('/admin/tests');
@@ -199,10 +217,18 @@ const CreateTest = () => {
     }
 
     // Process questions per section based on mode
-    const allQuestions = sectionsWithCat.flatMap(s => 
+    const allQuestions = isDynamic ? [] : sectionsWithCat.flatMap(s => 
       s.mode === 'manual' ? s.selectedQuestions : autoSelectQuestions(s.pool, s.count)
     );
+    
+    const dynamicConfig = isDynamic ? sectionsWithCat.map(s => ({
+      category: s.category,
+      difficulty: 'mixed', // could extend to allow per-section difficulty later
+      count: s.count
+    })) : [];
+
     const primaryCategory = sectionsWithCat[0]?.category || null;
+    const totalQCount = isDynamic ? sectionsWithCat.reduce((sum, s) => sum + s.count, 0) : allQuestions.length;
 
     const payload = {
       name: name.trim(),
@@ -214,8 +240,10 @@ const CreateTest = () => {
       negativeMarkValue: negativeMarking ? parseFloat(negativeMarkValue) : 0,
       randomizeQuestions,
       shuffleOptions,
+      isDynamic,
+      dynamicConfig,
       questions: allQuestions,
-      totalQuestions: allQuestions.length,
+      totalQuestions: totalQCount,
       isActive,
       startDate: startDate || null,
       endDate: endDate || null,
@@ -331,14 +359,14 @@ const CreateTest = () => {
                             Selection Mode
                           </label>
                           <Select
-                            value={section.mode}
+                            value={isDynamic ? 'automatic' : section.mode}
                             options={[{ label: 'Automatic (Random)', value: 'automatic' }, { label: 'Manual Selection', value: 'manual' }]}
                             onChange={e => handleSectionModeChange(section.id, e.target.value)}
-                            disabled={!section.category}
+                            disabled={!section.category || isDynamic}
                           />
                         </div>
 
-                        {section.mode === 'automatic' ? (
+                        {section.mode === 'automatic' || isDynamic ? (
                           <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                               No. of Questions to Pick
@@ -467,6 +495,17 @@ const CreateTest = () => {
                 </div>
                 <input type="checkbox" checked={shuffleOptions} onChange={e => setShuffleOptions(e.target.checked)}
                   className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Dynamic Generation</label>
+                  <p className="text-[10px] text-slate-400 mt-0.5 max-w-[200px]">Each student gets a uniquely randomized set of questions generated on the fly.</p>
+                </div>
+                <input type="checkbox" checked={isDynamic} onChange={e => setIsDynamic(e.target.checked)}
+                  className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-1" />
               </div>
             </div>
 

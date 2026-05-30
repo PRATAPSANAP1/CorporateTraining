@@ -174,7 +174,28 @@ const startTest = async (req, res) => {
       return errorResponse(res, 400, `This test has ended on ${new Date(test.endDate).toLocaleString()}`);
     }
 
-    let testQuestions = [...test.questions];
+    let testQuestions = [];
+
+    if (test.isDynamic && test.dynamicConfig && test.dynamicConfig.length > 0) {
+      // Dynamic Test: Fetch questions according to rules
+      for (const config of test.dynamicConfig) {
+        const query = { isActive: true };
+        if (config.category) query.category = config.category;
+        if (config.subcategory) query.subcategory = config.subcategory;
+        if (config.difficulty && config.difficulty !== 'mixed') query.difficulty = config.difficulty;
+
+        // Fetch matching questions
+        const matchingQuestions = await Question.find(query).select('-correctAnswer -explanation');
+        
+        // Randomly sample 'count' questions
+        const shuffled = matchingQuestions.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, config.count);
+        testQuestions = testQuestions.concat(selected);
+      }
+    } else {
+      // Static Test: Use pre-defined questions
+      testQuestions = [...test.questions];
+    }
 
     if (test.randomizeQuestions) {
       for (let i = testQuestions.length - 1; i > 0; i--) {
@@ -186,17 +207,66 @@ const startTest = async (req, res) => {
     const testData = test.toObject();
     testData.questions = testQuestions;
 
-    return successResponse(res, 200, 'Test started successfully', testData);
+    // Check if there is already an in_progress session
+    let result = await Result.findOne({ user: req.user._id, test: test._id, status: 'in_progress' });
+    
+    if (!result) {
+      // Create a draft Result session for this attempt
+      result = await Result.create({
+        user: req.user._id,
+        test: test._id,
+        status: 'in_progress',
+        answers: [],
+      });
+    }
+
+    return successResponse(res, 200, 'Test started successfully', {
+      test: testData,
+      resultId: result._id,
+      existingAnswers: result.answers || []
+    });
   } catch (error) {
     console.error('Start test error:', error.message);
     return errorResponse(res, 500, 'Server error starting test');
   }
 };
 
+const saveAnswer = async (req, res) => {
+  try {
+    const { resultId } = req.params;
+    const { questionId, selectedAnswer, timeTaken } = req.body;
+
+    const result = await Result.findOne({ _id: resultId, user: req.user._id, status: 'in_progress' });
+    if (!result) {
+      return errorResponse(res, 404, 'Active test session not found');
+    }
+
+    // Find if answer already exists
+    const existingIndex = result.answers.findIndex(ans => ans.question.toString() === questionId);
+    
+    if (existingIndex > -1) {
+      result.answers[existingIndex].selectedAnswer = selectedAnswer;
+      result.answers[existingIndex].timeTaken = (result.answers[existingIndex].timeTaken || 0) + (timeTaken || 0);
+    } else {
+      result.answers.push({
+        question: questionId,
+        selectedAnswer,
+        timeTaken: timeTaken || 0,
+      });
+    }
+
+    await result.save();
+    return successResponse(res, 200, 'Answer saved successfully');
+  } catch (error) {
+    console.error('Save answer error:', error.message);
+    return errorResponse(res, 500, 'Server error saving answer');
+  }
+};
+
 const submitTest = async (req, res) => {
   try {
     const testId = req.params.id;
-    const { answers, timeTaken, autoSubmitted } = req.body; // answers: [{ question: id, selectedAnswer: index, timeTaken: seconds }]
+    const { resultId, answers, timeTaken, autoSubmitted } = req.body; // answers: [{ question: id, selectedAnswer: index, timeTaken: seconds }]
 
     const test = await Test.findById(testId).populate('questions');
     if (!test) {
@@ -252,17 +322,38 @@ const submitTest = async (req, res) => {
     const percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
     const passed = obtainedMarks >= (test.passingMarks || 0);
 
-    const result = await Result.create({
-      user: req.user._id,
-      test: testId,
-      answers: processedAnswers,
-      totalMarks,
-      obtainedMarks,
-      percentage,
-      passed,
-      timeTaken: timeTaken || 0,
-      autoSubmitted: autoSubmitted || false,
-    });
+    // If a result draft was passed, use it, else create one
+    let result;
+    if (resultId) {
+      result = await Result.findOne({ _id: resultId, user: req.user._id });
+      if (result) {
+        result.answers = processedAnswers;
+        result.totalMarks = totalMarks;
+        result.obtainedMarks = obtainedMarks;
+        result.percentage = percentage;
+        result.passed = passed;
+        result.timeTaken = timeTaken || 0;
+        result.autoSubmitted = autoSubmitted || false;
+        result.status = 'completed';
+        result.submittedAt = Date.now();
+        await result.save();
+      }
+    }
+
+    if (!result) {
+      result = await Result.create({
+        user: req.user._id,
+        test: testId,
+        answers: processedAnswers,
+        totalMarks,
+        obtainedMarks,
+        percentage,
+        passed,
+        timeTaken: timeTaken || 0,
+        autoSubmitted: autoSubmitted || false,
+        status: 'completed'
+      });
+    }
 
     const user = await User.findById(req.user._id);
     if (user) {
@@ -315,6 +406,7 @@ module.exports = {
   updateTest,
   deleteTest,
   startTest,
+  saveAnswer,
   submitTest,
 };
 

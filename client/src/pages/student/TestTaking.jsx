@@ -13,6 +13,7 @@ const TestTaking = () => {
   const navigate = useNavigate();
 
   const [test, setTest] = useState(null);
+  const [resultId, setResultId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,14 +30,22 @@ const TestTaking = () => {
   const timerRef = useRef(null);
   const startTimeRef = useRef(Date.now());
   const questionStartTimeRef = useRef(Date.now());
+  const tabSwitchCountRef = useRef(0);
+  const executeSubmissionRef = useRef(null);
+
+  useEffect(() => {
+    executeSubmissionRef.current = executeSubmission;
+  });
 
   useEffect(() => {
     const fetchTestQuestions = async () => {
       try {
         setLoading(true);
         const res = await testService.startTest(id);
-        const testData = res.data;
+        const testData = res.data.test || res.data;
+        const rId = res.data.resultId || null;
         setTest(testData);
+        if (rId) setResultId(rId);
         setQuestions(testData.questions || []);
         setTimeLeft((testData.totalTime || 30) * 60);
 
@@ -77,10 +86,27 @@ const TestTaking = () => {
       e.returnValue = 'Are you sure you want to leave? Your exam progress will be lost.';
       return e.returnValue;
     };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        tabSwitchCountRef.current += 1;
+        const violations = tabSwitchCountRef.current;
+        
+        if (violations >= 3) {
+          toast.error('Test auto-submitted due to multiple tab switches!', { duration: 8000 });
+          if (executeSubmissionRef.current) executeSubmissionRef.current(true);
+        } else {
+          toast.error(`Warning: Do not switch tabs! (Violation ${violations}/3)`, { duration: 5000 });
+        }
+      }
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -130,11 +156,23 @@ const TestTaking = () => {
 
     setAnswers((prev) => {
       const qAns = prev[currentQ._id] || {};
+      const newTime = (qAns.timeTaken || 0) + timeSpent;
+      
+      // Auto-save the time spent
+      if (resultId) {
+        testService.saveAnswer(resultId, {
+          questionId: currentQ._id,
+          selectedAnswer: qAns.selectedAnswer,
+          timeTaken: timeSpent
+        }).catch(() => {});
+      }
+
       return {
         ...prev,
         [currentQ._id]: {
           ...qAns,
-          timeTaken: (qAns.timeTaken || 0) + timeSpent,
+          timeTaken: newTime,
+          visited: true,
         }
       };
     });
@@ -175,6 +213,7 @@ const TestTaking = () => {
       const totalTimeElapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
 
       const res = await testService.submitTest(id, {
+        resultId,
         answers: payloadAnswers,
         timeTaken: totalTimeElapsed,
         autoSubmitted: isAuto,
@@ -197,13 +236,25 @@ const TestTaking = () => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
 
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQ._id]: {
+    setAnswers((prev) => {
+      const newAns = {
         ...prev[currentQ._id],
         selectedAnswer: optionIndex
+      };
+      
+      if (resultId) {
+        testService.saveAnswer(resultId, {
+          questionId: currentQ._id,
+          selectedAnswer: optionIndex,
+          timeTaken: 0,
+        }).catch(() => {});
       }
-    }));
+
+      return {
+        ...prev,
+        [currentQ._id]: newAns
+      };
+    });
   };
 
   const handleToggleReview = () => {
@@ -424,8 +475,12 @@ const TestTaking = () => {
                   const isCurrent = idx === currentIndex;
                   const isAnswered = ans?.selectedAnswer !== null && ans?.selectedAnswer !== undefined;
                   const isMarked = ans?.markedForReview;
+                  const isVisited = ans?.visited;
 
                   let btnClass = 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'; // Default unanswered
+                  if (isVisited) {
+                    btnClass = 'bg-rose-50 border-rose-200 text-rose-500 dark:bg-rose-500/10 dark:border-rose-500/30';
+                  }
                   if (isAnswered) {
                     btnClass = 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/10';
                   }
@@ -463,7 +518,11 @@ const TestTaking = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-md border border-slate-200 dark:border-slate-800 shrink-0" />
-                  <span>Skipped</span>
+                  <span>Not Visited</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-md bg-rose-50 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/30 shrink-0" />
+                  <span>Visited</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-md border-2 border-blue-500 shrink-0" />

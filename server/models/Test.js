@@ -24,6 +24,18 @@ const testSchema = new mongoose.Schema(
         ref: 'Question',
       },
     ],
+    isDynamic: {
+      type: Boolean,
+      default: false,
+    },
+    dynamicConfig: [
+      {
+        category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+        subcategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory' },
+        difficulty: { type: String, enum: ['easy', 'medium', 'hard', 'mixed'], default: 'mixed' },
+        count: { type: Number, required: true },
+      }
+    ],
     totalQuestions: {
       type: Number,
       required: [true, 'Total questions count is required'],

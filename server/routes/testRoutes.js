@@ -7,6 +7,7 @@ const {
   updateTest,
   deleteTest,
   startTest,
+  saveAnswer,
   submitTest,
 } = require('../controllers/testController');
 const auth = require('../middleware/auth');
@@ -24,6 +25,7 @@ const testValidation = [
 router.get('/', auth, getTests);
 router.get('/:id', auth, getTest);
 router.post('/:id/start', auth, startTest);
+router.patch('/results/:resultId/save-answer', auth, saveAnswer);
 router.post('/:id/submit', auth, submitTest);
 
 router.post('/', auth, admin, validate(testValidation), createTest);

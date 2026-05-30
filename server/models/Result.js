@@ -12,6 +12,11 @@ const resultSchema = new mongoose.Schema(
       ref: 'Test',
       required: [true, 'Test is required'],
     },
+    status: {
+      type: String,
+      enum: ['in_progress', 'completed'],
+      default: 'completed',
+    },
     answers: [
       {
         question: {
