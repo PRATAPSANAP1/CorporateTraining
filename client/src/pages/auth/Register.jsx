@@ -245,7 +245,7 @@ const Register = () => {
           {/* Form Header */}
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              {step === 1 ? 'Create Account ✨' : 'Complete Profile 🎓'}
+              {step === 1 ? 'Create Account' : 'Complete Profile'}
             </h2>
             <p className="text-slate-500 dark:text-slate-400">
               {step === 1
@@ -261,7 +261,7 @@ const Register = () => {
                   icon={User}
                   label="Full Name"
                   name="name"
-                  placeholder="John Doe"
+                  placeholder="Enter your full name"
                   value={formData.name}
                   error={errors.name}
                   autoComplete="name"
