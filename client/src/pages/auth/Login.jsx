@@ -81,16 +81,16 @@ const Login = () => {
       </nav>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        
-        <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-6 text-center">
-          Sign In
-        </h2>
 
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 transition-all duration-300 p-6 sm:p-8">
+        <div className="w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 transition-all duration-300 p-8 sm:p-12 sm:py-14">
+          
+          <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-8 text-center">
+            Sign In
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
