@@ -10,6 +10,7 @@ module.exports = {
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   judge0ApiKey: process.env.JUDGE0_API_KEY || '',
   judge0ApiUrl: process.env.JUDGE0_API_URL || 'https://judge0-ce.p.rapidapi.com',
+  resendApiKey: process.env.RESEND_API_KEY || '',
   email: {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT) || 587,
