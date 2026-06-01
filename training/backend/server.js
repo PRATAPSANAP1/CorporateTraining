@@ -23,7 +23,21 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: config.clientUrl,
+  origin: function(origin, callback) {
+    const allowed = [
+      config.clientUrl,
+      'http://localhost:5500',
+      'http://127.0.0.1:5500',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ];
+    // Allow requests with no origin (file://, Postman, mobile apps)
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],

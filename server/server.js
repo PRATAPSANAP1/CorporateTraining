@@ -23,7 +23,22 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: config.clientUrl,
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests, or file://)
+    if (!origin) return callback(null, true);
+    
+    // allow any localhost origin for development
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true);
+    }
+    
+    // allow configured clientUrl
+    if (origin === config.clientUrl) {
+      return callback(null, true);
+    }
+    
+    return callback(null, true); // For this project, allow all to ease transition
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
