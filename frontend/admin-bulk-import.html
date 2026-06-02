@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIT_STACK - Bulk Questions Import</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- API Config -->
+    <script src="api.js?v=2"></script>
+</head>
+<body class="bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-white font-sans overflow-hidden">
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 dark:bg-[#0d1117] border-r border-slate-800/60 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
+            <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-sm leading-none">OIT_STACK</h1>
+                        <p class="text-[10px] text-slate-500 font-medium mt-0.5">Admin Portal</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 py-3 px-3 overflow-y-auto space-y-0.5">
+                <a href="admin-dashboard.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i> Dashboard
+                </a>
+                <a href="admin-students.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="users" class="w-4 h-4 shrink-0"></i> Students
+                </a>
+                <a href="admin-categories.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="folder-tree" class="w-4 h-4 shrink-0"></i> Categories
+                </a>
+                <a href="admin-questions.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="database" class="w-4 h-4 shrink-0"></i> Question Pool
+                </a>
+                <a href="admin-bulk-import.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 group">
+                    <i data-lucide="upload-cloud" class="w-4 h-4 shrink-0 text-indigo-400"></i> Bulk CSV Import
+                    <span class="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                </a>
+                <a href="admin-notifications.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="bell" class="w-4 h-4 shrink-0"></i> Send Announcements
+                </a>
+                <a href="admin-tests.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="file-text" class="w-4 h-4 shrink-0"></i> Tests
+                </a>
+                <a href="admin-coding.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="code" class="w-4 h-4 shrink-0"></i> Coding Challenges
+                </a>
+                <a href="admin-interviews.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="mic" class="w-4 h-4 shrink-0"></i> Mock Interviews
+                </a>
+                <a href="admin-results.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="award" class="w-4 h-4 shrink-0"></i> Results
+                </a>
+                <a href="admin-analytics.html" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i> Analytics
+                </a>
+            </nav>
+            <div class="p-3 border-t border-slate-800/60">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/40 text-slate-400 hover:text-rose-400 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span class="text-sm font-medium">Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 lg:ml-64 flex flex-col min-w-0 h-full">
+            <header class="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-4 lg:px-6 shrink-0 z-20">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
+                    </button>
+                    <h2 class="font-extrabold text-lg flex items-center gap-2">
+                        <i data-lucide="upload-cloud" class="w-5 h-5 text-indigo-500"></i> Bulk Questions Import
+                    </h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="/" class="text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mr-2">Home</a>
+                    <button onclick="toggleTheme()" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-slate-50/50 dark:bg-[#0a0f1e]/50">
+                <div class="max-w-4xl mx-auto flex flex-col gap-6 w-full pb-12">
+                    <!-- Toast -->
+                    <div id="toast" class="hidden fixed top-4 right-4 z-50 p-4 rounded-xl text-sm font-semibold shadow-lg border"></div>
+
+                    <!-- Instructions and template -->
+                    <div class="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm space-y-4">
+                        <h3 class="font-bold text-base flex items-center gap-1.5"><i data-lucide="info" class="text-blue-500"></i> CSV Template Instructions</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            To upload questions in bulk, prepare a CSV file using commas (`,`) as delimiters. Make sure options are separated by semicolons (`;`).
+                        </p>
+                        
+                        <div class="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl border text-[11px] font-mono whitespace-nowrap overflow-x-auto text-slate-600 dark:text-slate-300">
+                            question,options,correctAnswer,explanation,difficulty,category,subcategory,timeLimit,marks,type<br>
+                            "What is 2+2?","3;4;5;6",1,"2+2 equals 4",easy,647e33...,647e34...,60,1,mcq
+                        </div>
+
+                        <div class="flex items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-400">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Options format: opt1;opt2;opt3;opt4</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Correct answer is 0-indexed (e.g. 1 means second choice)</span>
+                        </div>
+                    </div>
+
+                    <!-- Uploader form -->
+                    <div class="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm space-y-5">
+                        <h3 class="font-bold text-base">Paste CSV or Select File</h3>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">CSV Text Content</label>
+                            <textarea id="csvText" rows="6" placeholder="Paste your comma-separated rows here..." class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
+                            <div class="flex items-center gap-3">
+                                <label class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 hover:dark:bg-slate-700 rounded-xl cursor-pointer text-xs font-bold transition-colors flex items-center gap-1.5 border border-slate-200/50 dark:border-slate-700/50">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i> Choose CSV File
+                                    <input type="file" id="csvFile" accept=".csv" class="hidden" onchange="handleFile(this)">
+                                </label>
+                                <span id="fileName" class="text-xs text-slate-400 font-semibold italic">No file selected</span>
+                            </div>
+
+                            <button onclick="parseCSV()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/10 flex items-center gap-1.5 transition-colors">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Validate & Preview CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview container -->
+                    <div id="previewCard" class="hidden p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="font-bold text-base">Upload Preview</h3>
+                                <p class="text-[10px] font-semibold text-slate-400 mt-0.5">Please review parsing warnings before launching import.</p>
+                            </div>
+                            <span id="previewStats" class="px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">Total Valid: 0</span>
+                        </div>
+
+                        <div class="max-h-[350px] overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-xl overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-800/40 text-[10px] font-black uppercase text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                                        <th class="px-4 py-3">Row</th>
+                                        <th class="px-4 py-3">Question Text</th>
+                                        <th class="px-4 py-3">Choices</th>
+                                        <th class="px-4 py-3">Correct Ans</th>
+                                        <th class="px-4 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="previewBody" class="text-xs">
+                                    <!-- Injected table rows -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-4">
+                            <button id="btnImport" onclick="importQuestions()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-500/15 flex items-center gap-1.5 transition-all duration-200">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> <span id="importText">Import Valid Questions</span>
+                                <div id="importSpinner" class="hidden animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function logout() {
+            api.removeToken();
+            window.location.href = 'login.html';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed top-4 right-4 z-50 p-4 rounded-xl text-sm font-semibold shadow-lg border ${
+                type === 'success' 
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-200 dark:border-slate-800' 
+                : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+            }`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        function handleFile(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            document.getElementById('fileName').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('csvText').value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+
+        let parsedQuestionsList = [];
+
+        function parseCSV() {
+            const csvText = document.getElementById('csvText').value.trim();
+            if(!csvText) {
+                showToast('Please paste CSV contents first.', 'error');
+                return;
+            }
+
+            const rows = splitCSV(csvText);
+            if(rows.length <= 1) {
+                showToast('CSV must contain a header row and at least one data row.', 'error');
+                return;
+            }
+
+            const header = rows[0].map(h => h.trim());
+            const dataRows = rows.slice(1);
+            
+            parsedQuestionsList = [];
+            let validCount = 0;
+
+            const tbody = document.getElementById('previewBody');
+            tbody.innerHTML = '';
+
+            dataRows.forEach((row, idx) => {
+                if (row.length === 0 || (row.length === 1 && row[0] === "")) return;
+                
+                const qObj = {};
+                // Map columns dynamically
+                header.forEach((col, cIdx) => {
+                    qObj[col] = row[cIdx] ? row[cIdx].trim() : '';
+                });
+
+                const errors = [];
+                if(!qObj.question) errors.push('Question text is missing');
+                
+                let options = [];
+                if (qObj.options) {
+                    options = qObj.options.split(';').map(o => o.trim()).filter(o => o);
+                }
+                if (options.length < 2 || options.length > 6) {
+                    errors.push('Options count must be between 2 and 6');
+                }
+
+                let correctIdx = parseInt(qObj.correctAnswer, 10);
+                if (isNaN(correctIdx) || correctIdx < 0 || correctIdx >= options.length) {
+                    errors.push(`Invalid correct answer index (must be 0 to ${options.length - 1})`);
+                }
+
+                if(!qObj.category) {
+                    errors.push('Category ObjectId is required');
+                } else if(qObj.category.length !== 24) {
+                    errors.push('Category must be a 24-character hex ObjectId');
+                }
+
+                const isValid = errors.length === 0;
+                if(isValid) validCount++;
+
+                const questionData = {
+                    question: qObj.question,
+                    options,
+                    correctAnswer: correctIdx,
+                    explanation: qObj.explanation || '',
+                    difficulty: qObj.difficulty || 'medium',
+                    category: qObj.category,
+                    subcategory: qObj.subcategory || null,
+                    timeLimit: parseInt(qObj.timeLimit, 10) || 60,
+                    marks: parseInt(qObj.marks, 10) || 1,
+                    type: qObj.type || 'mcq',
+                    isValid,
+                    errors
+                };
+
+                parsedQuestionsList.push(questionData);
+
+                // Add row to preview table
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 dark:border-slate-800/80 hover:bg-slate-50/20">
+                        <td class="px-4 py-3.5 font-bold">${idx + 1}</td>
+                        <td class="px-4 py-3.5 max-w-xs truncate font-semibold" title="${questionData.question || ''}">${questionData.question || '<span class="text-rose-500">Missing</span>'}</td>
+                        <td class="px-4 py-3.5 font-medium text-slate-400">${options.join(' | ')}</td>
+                        <td class="px-4 py-3.5 font-bold">${correctIdx}</td>
+                        <td class="px-4 py-3.5">
+                            ${isValid 
+                            ? '<span class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">Valid</span>'
+                            : `<span class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400" title="${errors.join(', ')}">Errors (${errors.length})</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('previewStats').textContent = `Total Valid: ${validCount} / ${parsedQuestionsList.length}`;
+            document.getElementById('previewCard').classList.remove('hidden');
+        }
+
+        // Custom standard RFC-compliant CSV splitter
+        function splitCSV(text) {
+            let p = '', c = '', r = [];
+            let q = false;
+            let row = [''];
+            for (let i=0; i<text.length; i++) {
+                c = text[i];
+                if (c === '"') {
+                    if (q && text[i+1] === '"') { row[row.length-1] += c; i++; }
+                    else { q = !q; }
+                } else if (c === ',') {
+                    if (q) { row[row.length-1] += c; }
+                    else { row.push(''); }
+                } else if (c === '\r' || c === '\n') {
+                    if (q) { row[row.length-1] += c; }
+                    else {
+                        if (c === '\r' && text[i+1] === '\n') { i++; }
+                        r.push(row);
+                        row = [''];
+                    }
+                } else {
+                    row[row.length-1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') { r.push(row); }
+            return r;
+        }
+
+        async function importQuestions() {
+            const validList = parsedQuestionsList.filter(q => q.isValid);
+            if (validList.length === 0) {
+                showToast('No valid questions to import.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnImport');
+            const text = document.getElementById('importText');
+            const spinner = document.getElementById('importSpinner');
+
+            btn.disabled = true;
+            text.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const cleanPayload = validList.map(q => ({
+                    question: q.question,
+                    options: q.options,
+                    correctAnswer: q.correctAnswer,
+                    explanation: q.explanation,
+                    difficulty: q.difficulty,
+                    category: q.category,
+                    subcategory: q.subcategory,
+                    timeLimit: q.timeLimit,
+                    marks: q.marks,
+                    type: q.type
+                }));
+
+                await api.request('/questions/bulk', {
+                    method: 'POST',
+                    body: JSON.stringify({ questions: cleanPayload })
+                });
+
+                showToast(`Successfully imported ${cleanPayload.length} questions! 🎉`);
+                setTimeout(() => window.location.href = 'admin-questions.html', 1500);
+
+            } catch (err) {
+                showToast(err.message || 'Error bulk importing questions', 'error');
+            } finally {
+                btn.disabled = false;
+                text.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

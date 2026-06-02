@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIT_STACK - Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="api.js?v=2"></script>
+    <style>
+        .progress-bar-animated { transition: width 1s ease-in-out; }
+        .timeline-dot { position: relative; }
+        .timeline-dot::before {
+            content: ''; position: absolute; left: 0.35rem; top: 1.5rem; bottom: -1.5rem;
+            width: 2px; background-color: #e2e8f0;
+        }
+        .dark .timeline-dot::before { background-color: #1e293b; }
+        .timeline-item:last-child .timeline-dot::before { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-white font-sans overflow-hidden">
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 dark:bg-[#0d1117] border-r border-slate-800/60 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
+            <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-sm leading-none">OIT_STACK</h1>
+                        <p class="text-[10px] text-slate-500 font-medium mt-0.5">Student Portal</p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-1.5 rounded-lg hover:bg-slate-800 text-slate-400">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <nav class="flex-1 py-3 px-3 overflow-y-auto space-y-0.5">
+                <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="home" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Home
+                </a>
+                <a href="student-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Dashboard
+                </a>
+                <a href="student-aptitude.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="brain" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Aptitude Hub
+                </a>
+                <a href="student-technical.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="terminal" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Training
+                </a>
+                <a href="student-coding.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="code" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Coding Challenges
+                </a>
+                <a href="student-interview-setup.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="mic" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Mock Interview
+                </a>
+                <a href="student-leaderboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="trophy" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Leaderboard
+                </a>
+                <a href="student-results.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> My Results
+                </a>
+                <a href="student-profile.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-blue-500/15 text-blue-400 border border-blue-500/20 group">
+                    <i data-lucide="user" class="w-4 h-4 shrink-0 text-blue-400"></i> Profile
+                    <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                </a>
+            </nav>
+
+            <div class="p-3 border-t border-slate-800/60">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-500/15 border border-blue-500/20">
+                    <div id="userInitialsSidebar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+                    <div class="flex-1 min-w-0">
+                        <p id="userNameSidebar" class="text-sm font-semibold text-white truncate">Student</p>
+                        <p id="userEmailSidebar" class="text-[10px] text-blue-400 truncate">student@example.com</p>
+                    </div>
+                    <button onclick="logout()" class="p-1.5 rounded-lg hover:bg-slate-700 transition-colors">
+                        <i data-lucide="log-out" class="w-4 h-4 text-slate-500 hover:text-rose-400"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden cursor-pointer"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 lg:ml-64 flex flex-col min-w-0 h-full">
+            <header class="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-4 lg:px-6 shrink-0 z-20">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
+                    </button>
+                    <h2 class="font-bold text-lg hidden sm:block">Student Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <a href="/" class="text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mr-4">Home</a>
+          <button onclick="toggleTheme()" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    </button>
+                    <div class="ml-1 pl-3 border-l border-slate-200 dark:border-slate-700">
+                        <div id="userInitialsTopbar" class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md">S</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6 pb-20">
+                <div id="loader" class="flex justify-center items-center py-12 hidden">
+                    <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                </div>
+
+                <div id="profileContent" class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
+                    
+                    <!-- Left Column: Personal Information -->
+                    <div class="w-full lg:w-1/3 flex flex-col gap-6 shrink-0">
+                        
+                        <!-- Profile Card -->
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+                            <div class="h-32 bg-gradient-to-br from-blue-600 to-indigo-800 relative">
+                                <button onclick="toggleEditMode()" id="editBtn" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-1.5 rounded-xl text-white text-xs font-bold transition-colors flex items-center gap-1.5">
+                                    <i data-lucide="edit-2" class="w-3.5 h-3.5 edit-icon"></i> <span class="edit-text">Edit Profile</span>
+                                </button>
+                            </div>
+                            
+                            <div class="px-6 pb-6 pt-0 relative flex flex-col items-center">
+                                <div id="avatarLarge" class="w-24 h-24 rounded-full bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white font-black text-3xl shadow-xl -mt-12 mb-4 overflow-hidden relative">
+                                    <span id="avatarInitials">ST</span>
+                                    <img id="avatarImage" src="" class="hidden absolute inset-0 w-full h-full object-cover" />
+                                </div>
+                                <h2 id="nameDisplay" class="text-xl font-extrabold text-slate-900 dark:text-white text-center">Student Name</h2>
+                                <p id="roleDisplay" class="text-sm font-semibold text-blue-500 dark:text-blue-400 mt-1">Software Engineering Trainee</p>
+                                <div class="mt-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                    Active Student
+                                </div>
+
+                                <!-- Display Mode Details -->
+                                <div id="displayDetails" class="w-full mt-8 space-y-4 text-sm font-medium">
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="fingerprint" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Student/Employee ID</p>
+                                            <p id="idDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5">OIT-2026-001</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="mail" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div class="min-w-0">
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Email Address</p>
+                                            <p id="emailDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5 truncate">student@example.com</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="phone" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Phone Number</p>
+                                            <p id="phoneDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5">+91 9876543210</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="briefcase" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Department</p>
+                                            <p id="deptDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5">Engineering</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="map-pin" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Location</p>
+                                            <p id="locationDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5">Pune, India</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 shrink-0"><i data-lucide="calendar-days" class="w-4 h-4 text-slate-500"></i></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Joining Date</p>
+                                            <p id="joinedDisplay" class="text-slate-800 dark:text-slate-200 mt-0.5">August 1st, 2024</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Mode Form -->
+                                <form id="editForm" class="w-full mt-8 space-y-4 hidden text-left">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Full Name</label>
+                                        <input type="text" id="inputName" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Student ID</label>
+                                            <input type="text" id="inputId" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Phone</label>
+                                            <input type="text" id="inputPhone" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Location</label>
+                                        <input type="text" id="inputLocation" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Department</label>
+                                        <select id="inputDept" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none">
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Product">Product</option>
+                                            <option value="Design">Design</option>
+                                            <option value="Data Science">Data Science</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Designation / Branch</label>
+                                        <select id="inputBranch" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none">
+                                            <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                                            <option value="Information Technology">Information Technology</option>
+                                            <option value="Electronics & Communication">Electronics & Communication</option>
+                                            <option value="Electrical Engineering">Electrical Engineering</option>
+                                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                            <option value="Civil Engineering">Civil Engineering</option>
+                                            <option value="Chemical Engineering">Chemical Engineering</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">Academic Year</label>
+                                        <select id="inputYear" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none">
+                                            <option value="1st Year">1st Year</option>
+                                            <option value="2nd Year">2nd Year</option>
+                                            <option value="3rd Year">3rd Year</option>
+                                            <option value="4th Year">4th Year</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit" id="saveBtn" class="w-full py-2.5 mt-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                                        <i data-lucide="save" class="w-4 h-4"></i> Save Changes
+                                    </button>
+                                    <p id="errMessage" class="hidden text-rose-500 text-xs font-bold text-center mt-2"></p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Stats & Progress -->
+                    <div class="flex-1 flex flex-col gap-6 w-full">
+                        
+                        <!-- Learning Statistics Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Enrolled</p>
+                                    <div class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10"><i data-lucide="book" class="w-4 h-4 text-blue-500"></i></div>
+                                </div>
+                                <h3 id="statEnrolled" class="text-3xl font-black text-slate-800 dark:text-white">0</h3>
+                                <p class="text-[10px] text-slate-400 font-bold mt-1">Courses</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Avg Score</p>
+                                    <div class="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-500/10"><i data-lucide="target" class="w-4 h-4 text-purple-500"></i></div>
+                                </div>
+                                <h3 id="statAvgScore" class="text-3xl font-black text-slate-800 dark:text-white">0%</h3>
+                                <p class="text-[10px] text-slate-400 font-bold mt-1">Overall Avg</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Rank</p>
+                                    <div class="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10"><i data-lucide="crown" class="w-4 h-4 text-amber-500"></i></div>
+                                </div>
+                                <h3 id="statRank" class="text-3xl font-black text-slate-800 dark:text-white">#0</h3>
+                                <p class="text-[10px] text-slate-400 font-bold mt-1">Global</p>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Assessments</p>
+                                    <div class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10"><i data-lucide="clipboard-list" class="w-4 h-4 text-indigo-500"></i></div>
+                                </div>
+                                <h3 id="statAssessments" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Coding Pblms</p>
+                                    <div class="p-1.5 rounded-lg bg-pink-50 dark:bg-pink-500/10"><i data-lucide="code-2" class="w-4 h-4 text-pink-500"></i></div>
+                                </div>
+                                <h3 id="statCodingPblms" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
+                            </div>
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+                                <div class="flex justify-between items-start mb-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Certificates</p>
+                                    <div class="p-1.5 rounded-lg bg-yellow-50 dark:bg-yellow-500/10"><i data-lucide="award" class="w-4 h-4 text-yellow-600"></i></div>
+                                </div>
+                                <h3 id="statCertificates" class="text-2xl font-black text-slate-800 dark:text-white">0</h3>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            <!-- Skill Progress Section -->
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                    </div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white text-lg">Skill Progress</h3>
+                                </div>
+                                
+                                <div id="skillProgressContainer" class="space-y-5">
+                                    <!-- Dynamic Skills -->
+                                    <p class="text-sm text-slate-500">Loading skills...</p>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity Timeline -->
+                            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                                        <i data-lucide="activity" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                                    </div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white text-lg">Recent Activity</h3>
+                                </div>
+
+                                <div id="recentActivityContainer" class="space-y-4">
+                                    <!-- Dynamic Activity -->
+                                    <p class="text-sm text-slate-500">Loading activity...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 right-4 z-50 p-4 rounded-xl text-sm font-semibold shadow-lg border"></div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        function logout() {
+            api.removeToken();
+            window.location.href = 'login.html';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed top-4 right-4 z-50 p-4 rounded-xl text-sm font-semibold shadow-lg border transition-opacity ${
+                type === 'success' 
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-200 dark:border-slate-800' 
+                : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
+            }`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        let currentUser = null;
+        let isEditMode = false;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = api.getToken();
+            if (!token) { window.location.href = 'login.html'; return; }
+
+            try {
+                await loadUserProfile();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        async function loadUserProfile() {
+            try {
+                const profileRes = await api.auth.getProfile();
+                currentUser = profileRes.data.user;
+                populateUI(currentUser);
+
+                // Fetch Dashboard Stats
+                const statsRes = await api.request('/auth/dashboard');
+                if (statsRes && statsRes.data) {
+                    populateDashboardStats(statsRes.data);
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function populateDashboardStats(data) {
+            const { stats, skillProgress, recentActivity } = data;
+
+            document.getElementById('statAvgScore').textContent = stats.avgScore + '%';
+            document.getElementById('statRank').textContent = '#' + (stats.rank || 0);
+            document.getElementById('statAssessments').textContent = stats.assessmentsTaken;
+            document.getElementById('statCodingPblms').textContent = stats.codingProblemsSolved;
+            // Enrolled and Certificates remain at 0 mock for now
+
+            // Render Skills
+            const skillContainer = document.getElementById('skillProgressContainer');
+            if (skillProgress.length === 0) {
+                skillContainer.innerHTML = '<p class="text-sm text-slate-500">No assessments taken yet.</p>';
+            } else {
+                const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-amber-500'];
+                skillContainer.innerHTML = skillProgress.map((skill, index) => `
+                    <div>
+                        <div class="flex justify-between text-sm font-semibold mb-1.5">
+                            <span class="text-slate-700 dark:text-slate-300 capitalize">${skill.skill}</span>
+                            <span class="text-slate-500">${skill.progress}%</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full ${colors[index % colors.length]} rounded-full progress-bar-animated" style="width: ${skill.progress}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render Activities
+            const activityContainer = document.getElementById('recentActivityContainer');
+            if (recentActivity.length === 0) {
+                activityContainer.innerHTML = '<p class="text-sm text-slate-500">No recent activity.</p>';
+            } else {
+                const actColors = {
+                    'Assessment': 'bg-blue-500 ring-blue-50 dark:ring-slate-800/50',
+                    'Coding': 'bg-indigo-500 ring-indigo-50 dark:ring-slate-800/50'
+                };
+                activityContainer.innerHTML = recentActivity.map(act => `
+                    <div class="flex gap-4 timeline-item">
+                        <div class="timeline-dot mt-1 shrink-0">
+                            <div class="w-3 h-3 rounded-full ${actColors[act.type] || actColors['Assessment']} ring-4"></div>
+                        </div>
+                        <div class="pb-4">
+                            <p class="text-sm font-bold text-slate-800 dark:text-white">${act.title}</p>
+                            <p class="text-xs text-slate-500 mt-1">${act.desc}</p>
+                            <p class="text-[10px] text-slate-400 font-semibold mt-1.5">${new Date(act.date).toLocaleDateString()} ${new Date(act.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function populateUI(user) {
+            const initials = user.name.charAt(0).toUpperCase();
+            
+            // Topbar & Sidebar
+            document.getElementById('userInitialsSidebar').textContent = initials;
+            document.getElementById('userInitialsTopbar').textContent = initials;
+            document.getElementById('userNameSidebar').textContent = user.name;
+            document.getElementById('userEmailSidebar').textContent = user.email;
+
+            // Display Card
+            document.getElementById('avatarInitials').textContent = initials + (user.name.split(' ')[1] ? user.name.split(' ')[1][0].toUpperCase() : '');
+            document.getElementById('nameDisplay').textContent = user.name;
+            document.getElementById('emailDisplay').textContent = user.email;
+            document.getElementById('phoneDisplay').textContent = user.phone || 'Not Provided';
+            document.getElementById('roleDisplay').textContent = user.branch || 'Trainee';
+            document.getElementById('deptDisplay').textContent = user.college || 'Engineering';
+            
+            // Mocking these for now since they aren't fully integrated in the current DB schema
+            document.getElementById('idDisplay').textContent = user.studentId || 'OIT-' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('locationDisplay').textContent = user.location || 'Pune, India';
+            document.getElementById('joinedDisplay').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+
+            // Form Inputs
+            document.getElementById('inputName').value = user.name || '';
+            document.getElementById('inputId').value = user.studentId || '';
+            document.getElementById('inputPhone').value = user.phone || '';
+            document.getElementById('inputLocation').value = user.location || '';
+            
+            // Safely set Select Values if they match options
+            if(user.college) document.getElementById('inputDept').value = user.college;
+            if(user.branch) document.getElementById('inputBranch').value = user.branch;
+            if(user.year) document.getElementById('inputYear').value = user.year;
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            if (isEditMode) {
+                document.getElementById('displayDetails').classList.add('hidden');
+                document.getElementById('editForm').classList.remove('hidden');
+                document.querySelector('.edit-icon').outerHTML = '<i data-lucide="x" class="w-3.5 h-3.5 edit-icon"></i>';
+                document.querySelector('.edit-text').textContent = 'Cancel';
+            } else {
+                document.getElementById('displayDetails').classList.remove('hidden');
+                document.getElementById('editForm').classList.add('hidden');
+                document.querySelector('.edit-icon').outerHTML = '<i data-lucide="edit-2" class="w-3.5 h-3.5 edit-icon"></i>';
+                document.querySelector('.edit-text').textContent = 'Edit Profile';
+                populateUI(currentUser);
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('saveBtn');
+            const errEl = document.getElementById('errMessage');
+            errEl.classList.add('hidden');
+
+            const payload = {
+                name: document.getElementById('inputName').value,
+                phone: document.getElementById('inputPhone').value,
+                studentId: document.getElementById('inputId').value,
+                location: document.getElementById('inputLocation').value,
+                college: document.getElementById('inputDept').value, // Mapping Dept to College in DB temporarily
+                branch: document.getElementById('inputBranch').value,
+                year: document.getElementById('inputYear').value,
+            };
+
+            if (!payload.name.trim()) {
+                errEl.textContent = 'Name field cannot be left blank.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                btn.innerHTML = '<div class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div> Saving...';
+                btn.disabled = true;
+
+                await api.request('/auth/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+
+                showToast('Profile updated successfully!');
+                await loadUserProfile();
+                toggleEditMode();
+            } catch(err) {
+                errEl.textContent = err.message || 'Failed to update profile.';
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Save Changes';
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

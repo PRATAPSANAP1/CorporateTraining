@@ -91,33 +91,24 @@ A comprehensive full-stack web application to help students prepare for campus p
 ## 📁 Project Structure
 
 ```
-├── client/                  # React Frontend
-│   ├── public/
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── layouts/         # Page layout wrappers
-│   │   ├── pages/           # Route-level pages
-│   │   │   ├── auth/        # Login, Register, Forgot Password
-│   │   │   ├── student/     # Student pages
-│   │   │   └── admin/       # Admin pages
-│   │   ├── redux/           # Redux store & slices
-│   │   ├── routes/          # Route protection
-│   │   ├── services/        # Axios API services
-│   │   └── utils/           # Helpers & constants
-│   ├── tailwind.config.js
-│   └── vite.config.js
-│
-├── server/                  # Express Backend
+├── backend/                 # Express Backend API
 │   ├── config/              # DB & env config
 │   ├── controllers/         # Route handlers
-│   ├── middleware/           # Auth, admin, error handling
+│   ├── middleware/          # Auth, admin, error handling
 │   ├── models/              # Mongoose schemas
 │   ├── routes/              # API routes
 │   ├── seeds/               # Database seeders
 │   ├── utils/               # Helpers
 │   └── server.js            # Entry point
 │
+├── frontend/                # Vanilla HTML/JS/CSS Frontend
+│   ├── css/                 # Styling sheet assets
+│   ├── image/               # Branding assets
+│   ├── index.html           # Portal home
+│   ├── api.js               # In-memory API utility
+│   └── [pages].html         # Admin & student portal views
+│
+├── image/                   # Platform asset resources
 ├── .gitignore
 └── README.md
 ```
@@ -134,22 +125,20 @@ A comprehensive full-stack web application to help students prepare for campus p
 ### 1. Clone the Repository
 ```bash
 git clone <your-repo-url>
-cd task2
+cd OIT_STACK_Preparation
 ```
 
 ### 2. Setup Backend
 ```bash
-cd server
+cd backend
 
 # Install dependencies
 npm install
 
 # Configure environment variables
-# Edit .env file with your values:
+# Create a .env file and edit it based on .env.example:
 #   MONGODB_URI=your_mongodb_uri
 #   JWT_SECRET=your_secret_key
-#   OPENAI_API_KEY=your_openai_key (optional)
-#   JUDGE0_API_KEY=your_rapidapi_key (optional)
 
 # Seed default admin account
 npm run seed
@@ -159,18 +148,12 @@ npm run dev
 ```
 
 ### 3. Setup Frontend
-```bash
-cd client
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
+The frontend consists of highly performant vanilla HTML, CSS, and JS files. You can serve the `frontend/` directory using any local web server, for example:
+- **VS Code Live Server extension** (starts on http://localhost:5500 by default)
+- **npx serve**: `npx serve frontend`
 
 ### 4. Access the Application
-- **Frontend**: http://localhost:5173
+- **Frontend**: http://localhost:5500 (or the port assigned by your server)
 - **Backend API**: http://localhost:5000
 - **API Health Check**: http://localhost:5000/api/health
 

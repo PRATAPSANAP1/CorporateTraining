@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIT_STACK - Student Progress & Analytics</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- API Config -->
+    <script src="api.js?v=2"></script>
+</head>
+<body class="bg-slate-50 dark:bg-[#0a0f1e] text-slate-900 dark:text-white font-sans overflow-hidden">
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 dark:bg-[#0d1117] border-r border-slate-800/60 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
+            <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-sm leading-none">OIT_STACK</h1>
+                        <p class="text-[10px] text-slate-500 font-medium mt-0.5">Student Portal</p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-1.5 rounded-lg hover:bg-slate-800 text-slate-400">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <nav class="flex-1 py-3 px-3 overflow-y-auto space-y-0.5">
+                <a href="student-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Dashboard
+                </a>
+                <a href="student-progress.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 group">
+                    <i data-lucide="line-chart" class="w-4 h-4 shrink-0 text-cyan-400"></i> Performance Analytics
+                    <span class="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                </a>
+                <a href="student-aptitude.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="brain" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Aptitude Hub
+                </a>
+                <a href="student-technical.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="terminal" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Training (MCQs)
+                </a>
+                <a href="student-coding.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="code" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Coding Challenges
+                </a>
+                <a href="student-interview-setup.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="mic" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Mock Interview
+                </a>
+                <a href="student-leaderboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="trophy" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Leaderboard
+                </a>
+                <a href="student-results.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> My Results
+                </a>
+                <a href="student-profile.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 group">
+                    <i data-lucide="user" class="w-4 h-4 shrink-0 text-slate-500 group-hover:text-slate-300"></i> Profile
+                </a>
+            </nav>
+
+            <div class="p-3 border-t border-slate-800/60">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/40">
+                    <div id="userInitialsSidebar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+                    <div class="flex-1 min-w-0">
+                        <p id="userNameSidebar" class="text-sm font-semibold text-white truncate">Student</p>
+                        <p id="userEmailSidebar" class="text-[10px] text-slate-500 truncate">student@example.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden cursor-pointer"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 lg:ml-64 flex flex-col min-w-0 h-full">
+            <!-- Topbar -->
+            <header class="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between px-4 lg:px-6 shrink-0 z-20">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
+                    </button>
+                    <h2 class="font-extrabold text-lg flex items-center gap-2">
+                        <i data-lucide="line-chart" class="w-5 h-5 text-cyan-500"></i> Performance Analytics
+                    </h2>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <a href="/" class="text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mr-4">Home</a>
+                    <button onclick="toggleTheme()" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+                <!-- Loader -->
+                <div id="loader" class="flex justify-center items-center h-64">
+                    <div class="animate-spin h-8 w-8 border-4 border-cyan-500 border-t-transparent rounded-full"></div>
+                </div>
+
+                <div id="analyticsContent" class="hidden flex flex-col gap-6">
+                    <!-- Key Statistics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400"><i data-lucide="award" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-xs font-medium text-slate-500">Aptitude Avg Accuracy</p>
+                                <p id="stat-apt-avg" class="text-2xl font-bold">0%</p>
+                            </div>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"><i data-lucide="terminal" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-xs font-medium text-slate-500">Technical Avg Accuracy</p>
+                                <p id="stat-tech-avg" class="text-2xl font-bold">0%</p>
+                            </div>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+                            <div>
+                                <p class="text-xs font-medium text-slate-500">Tests Cleared</p>
+                                <p id="stat-tests-passed" class="text-2xl font-bold">0 / 0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Progress Curve -->
+                        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                            <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-cyan-500"></i> Performance Timeline</h3>
+                            <canvas id="timelineChart" class="w-full h-72"></canvas>
+                        </div>
+                        
+                        <!-- Strengths Radar -->
+                        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                            <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="star" class="w-4 h-4 text-amber-500"></i> Section Strengths</h3>
+                            <canvas id="strengthsChart" class="w-full h-72"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Strengths and Weaknesses Dashboard -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Strong areas -->
+                        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col gap-4">
+                            <h3 class="font-black text-sm uppercase tracking-wider text-emerald-500 flex items-center gap-2">
+                                <i data-lucide="check-circle-2"></i> Strong Domains (>= 60% Accuracy)
+                            </h3>
+                            <div id="strongList" class="flex flex-col gap-2.5">
+                                <p class="text-slate-400 text-xs italic">Calculating strong areas...</p>
+                            </div>
+                        </div>
+
+                        <!-- Weak areas -->
+                        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col gap-4">
+                            <h3 class="font-black text-sm uppercase tracking-wider text-rose-500 flex items-center gap-2">
+                                <i data-lucide="alert-triangle"></i> Weak Domains (< 60% Accuracy)
+                            </h3>
+                            <div id="weakList" class="flex flex-col gap-2.5">
+                                <p class="text-slate-400 text-xs italic">Calculating weak areas...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Recommendations -->
+                    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex flex-col gap-4">
+                        <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                            <i data-lucide="sparkles" class="text-amber-500 w-5 h-5 animate-pulse"></i> Personalized Study Recommendations
+                        </h3>
+                        <div id="recommendationsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Recommendations loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+            renderCharts();
+        }
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        let timelineChartInstance = null;
+        let strengthsChartInstance = null;
+
+        let results = [];
+        let categoryStats = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!api.getToken()) { window.location.href = 'login.html'; return; }
+
+            try {
+                // Get user profile
+                const profileRes = await api.auth.getProfile();
+                const user = profileRes.data.user;
+                const initials = user.name.charAt(0).toUpperCase();
+                
+                document.getElementById('userInitialsSidebar').textContent = initials;
+                document.getElementById('userNameSidebar').textContent = user.name;
+                document.getElementById('userEmailSidebar').textContent = user.email;
+
+                // Load results
+                const resultsRes = await api.request('/results/my?limit=100');
+                results = resultsRes.data.results || [];
+
+                calculateStats();
+                populateUI();
+                renderCharts();
+
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('analyticsContent').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function calculateStats() {
+            let aptScores = 0, aptCount = 0;
+            let techScores = 0, techCount = 0;
+            let passCount = 0;
+
+            categoryStats = {};
+
+            results.forEach(res => {
+                if (res.passed) passCount++;
+                const percentage = res.percentage || 0;
+                
+                if (res.test) {
+                    const testType = res.test.category?.type || 'other';
+                    const catName = res.test.category?.name || 'Uncategorized';
+
+                    if (testType === 'aptitude') {
+                        aptScores += percentage;
+                        aptCount++;
+                    } else if (testType === 'technical') {
+                        techScores += percentage;
+                        techCount++;
+                    }
+
+                    if (!categoryStats[catName]) {
+                        categoryStats[catName] = { total: 0, count: 0 };
+                    }
+                    categoryStats[catName].total += percentage;
+                    categoryStats[catName].count++;
+                }
+            });
+
+            const aptAvg = aptCount > 0 ? Math.round(aptScores / aptCount) : 0;
+            const techAvg = techCount > 0 ? Math.round(techScores / techCount) : 0;
+
+            document.getElementById('stat-apt-avg').textContent = aptAvg + '%';
+            document.getElementById('stat-tech-avg').textContent = techAvg + '%';
+            document.getElementById('stat-tests-passed').textContent = `${passCount} / ${results.length}`;
+        }
+
+        function populateUI() {
+            const strongEl = document.getElementById('strongList');
+            const weakEl = document.getElementById('weakList');
+            const recEl = document.getElementById('recommendationsList');
+
+            let strongs = [];
+            let weaks = [];
+
+            Object.keys(categoryStats).forEach(cat => {
+                const avg = Math.round(categoryStats[cat].total / categoryStats[cat].count);
+                if (avg >= 60) {
+                    strongs.push({ name: cat, score: avg });
+                } else {
+                    weaks.push({ name: cat, score: avg });
+                }
+            });
+
+            // Populate strong areas
+            if (strongs.length > 0) {
+                strongEl.innerHTML = strongs.map(s => `
+                    <div class="flex items-center justify-between p-3 border border-emerald-100/50 dark:border-emerald-950/20 bg-emerald-50/15 dark:bg-emerald-500/5 rounded-xl">
+                        <span class="text-sm font-semibold">${s.name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">${s.score}% Accuracy</span>
+                    </div>
+                `).join('');
+            } else {
+                strongEl.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 italic py-4 text-center">Practice tests to discover your strengths.</p>';
+            }
+
+            // Populate weak areas
+            if (weaks.length > 0) {
+                weakEl.innerHTML = weaks.map(w => `
+                    <div class="flex items-center justify-between p-3 border border-rose-100/50 dark:border-rose-950/20 bg-rose-50/15 dark:bg-rose-500/5 rounded-xl">
+                        <span class="text-sm font-semibold">${w.name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded font-black bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400">${w.score}% Accuracy</span>
+                    </div>
+                `).join('');
+            } else {
+                weakEl.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 italic py-4 text-center">Great job! No categories are currently under 60% accuracy.</p>';
+            }
+
+            // Generate smart recommendations
+            let recs = [];
+            
+            if (results.length === 0) {
+                recs.push({
+                    title: 'Start Practicing',
+                    desc: 'Take your first Aptitude test to evaluate your performance benchmark.',
+                    icon: 'play-circle',
+                    color: 'text-blue-500 bg-blue-50 dark:bg-blue-500/10'
+                });
+            }
+
+            weaks.forEach(w => {
+                recs.push({
+                    title: `Improve in ${w.name}`,
+                    desc: `Your current accuracy is ${w.score}%. Take at least 2 mock tests in this domain to improve in core placement rounds.`,
+                    icon: 'book-open',
+                    color: 'text-rose-500 bg-rose-50 dark:bg-rose-500/10'
+                });
+            });
+
+            if (strongs.length > 0) {
+                recs.push({
+                    title: 'Advance to Coding Challenges',
+                    desc: 'You show solid logical strengths. Translate this into raw points on the global leaderboard by attempting dynamic coding challenges.',
+                    icon: 'code',
+                    color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10'
+                });
+            }
+
+            if (recs.length === 0) {
+                recs.push({
+                    title: 'Keep Striving',
+                    desc: 'Maintain consistency and take mock interviews to test your communication and confidence bounds under pressure.',
+                    icon: 'mic',
+                    color: 'text-purple-500 bg-purple-50 dark:bg-purple-500/10'
+                });
+            }
+
+            recEl.innerHTML = recs.map(r => `
+                <div class="p-4 border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/30 rounded-2xl flex gap-4 hover:border-amber-500/30 transition-colors">
+                    <div class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center ${r.color}"><i data-lucide="${r.icon}" class="w-5 h-5"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white">${r.title}</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">${r.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function renderCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+            // Timeline line chart
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            if (timelineChartInstance) timelineChartInstance.destroy();
+
+            const chronologicalResults = results.slice().reverse();
+            timelineChartInstance = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: chronologicalResults.map(r => new Date(r.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Accuracy %',
+                        data: chronologicalResults.map(r => r.percentage),
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.08)',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: gridColor }, ticks: { color: textColor } },
+                        x: { grid: { display: false }, ticks: { color: textColor } }
+                    }
+                }
+            });
+
+            // Strengths radar/bar chart
+            const strengthsCtx = document.getElementById('strengthsChart').getContext('2d');
+            if (strengthsChartInstance) strengthsChartInstance.destroy();
+
+            const categories = Object.keys(categoryStats);
+            const averages = categories.map(cat => Math.round(categoryStats[cat].total / categoryStats[cat].count));
+
+            strengthsChartInstance = new Chart(strengthsCtx, {
+                type: categories.length > 2 ? 'radar' : 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Average Score %',
+                        data: averages,
+                        backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)',
+                        borderColor: '#6366f1',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6366f1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: categories.length > 2 ? {
+                        r: {
+                            angleLines: { color: gridColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: textColor, font: { size: 10, weight: 'bold' } },
+                            ticks: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    } : {
+                        y: { beginAtZero: true, max: 100, grid: { color: gridColor }, ticks: { color: textColor } },
+                        x: { grid: { display: false }, ticks: { color: textColor } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
