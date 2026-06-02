@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 // Read the VITE_API_URL from environment variables, fall back to the live Render URL
-const apiUrl = process.env.VITE_API_URL || 'https://corporatetraining.onrender.com/api';
+let apiUrl = (process.env.VITE_API_URL || 'https://corporatetraining.onrender.com/api').trim().replace(/\/$/, '');
+if (!apiUrl.endsWith('/api')) {
+  apiUrl = apiUrl + '/api';
+}
 
 // Path to api.js
 const apiPath = path.join(__dirname, 'api.js');

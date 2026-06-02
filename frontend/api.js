@@ -6,14 +6,19 @@ const getApiUrl = () => {
     }
     
     // Check if there is an environment variable injected (e.g. via Bundlers)
+    let url = 'https://corporatetraining.onrender.com/api';
     try {
         if (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
-            return process.env.VITE_API_URL;
+            url = process.env.VITE_API_URL;
         }
     } catch (e) {}
 
-    // Live backend fallback
-    return 'https://corporatetraining.onrender.com/api';
+    // Ensure resolved URL ends with /api for backend endpoint routing
+    url = url.trim().replace(/\/$/, '');
+    if (!url.endsWith('/api')) {
+        url = url + '/api';
+    }
+    return url;
 };
 
 const CONFIG = {
