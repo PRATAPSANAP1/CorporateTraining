@@ -1,8 +1,29 @@
 // Global Configuration and API Utility
+const getApiUrl = () => {
+    // If running locally, connect to local backend port
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5000/api';
+    }
+    
+    // Check if there is an environment variable injected (e.g. via Bundlers)
+    try {
+        if (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
+            return process.env.VITE_API_URL;
+        }
+    } catch (e) {}
+
+    try {
+        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+            return import.meta.env.VITE_API_URL;
+        }
+    } catch (e) {}
+
+    // Live backend fallback
+    return 'https://corporatetraining.onrender.com/api';
+};
+
 const CONFIG = {
-    API_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:5000/api'
-        : 'https://corporatetraining.onrender.com/api'
+    API_URL: getApiUrl()
 };
 
 let accessToken = null;
