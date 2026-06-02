@@ -84,7 +84,8 @@ const api = {
             try {
                 const refreshResponse = await fetch(`${baseUrl}/auth/refresh`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
                 });
                 if (refreshResponse.ok) {
                     const data = await refreshResponse.json();
@@ -112,6 +113,7 @@ const api = {
         const config = {
             ...options,
             headers,
+            credentials: 'include'
         };
 
         const attemptFetch = async (url) => {
