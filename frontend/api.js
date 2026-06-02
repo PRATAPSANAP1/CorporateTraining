@@ -12,12 +12,6 @@ const getApiUrl = () => {
         }
     } catch (e) {}
 
-    try {
-        if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
-            return import.meta.env.VITE_API_URL;
-        }
-    } catch (e) {}
-
     // Live backend fallback
     return 'https://corporatetraining.onrender.com/api';
 };
