@@ -46,10 +46,11 @@ const register = async (req, res) => {
     };
 
     // Send refreshToken in cookie
+    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -106,10 +107,11 @@ const login = async (req, res) => {
       profileImage: user.profileImage,
     };
 
+    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -290,7 +292,12 @@ const logout = async (req, res) => {
     if (refreshToken) {
       await Session.findOneAndUpdate({ refreshToken }, { isActive: false });
     }
-    res.clearCookie('refreshToken');
+    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
     return successResponse(res, 200, 'Logged out successfully');
   } catch (error) {
     console.error('Logout error:', error.message);
@@ -303,7 +310,12 @@ const logoutAll = async (req, res) => {
     await Session.updateMany({ user: req.user._id }, { isActive: false });
     req.user.activeSessionId = null;
     await req.user.save();
-    res.clearCookie('refreshToken');
+    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
     return successResponse(res, 200, 'Logged out from all devices');
   } catch (error) {
     console.error('Logout all error:', error.message);
