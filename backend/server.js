@@ -29,6 +29,7 @@ app.use(cors({
       config.clientUrl,
       'https://www.oitstack.com',
       'https://oitstack.com',
+      'https://corporate-training-olive.vercel.app',
       'http://localhost:5500',
       'http://127.0.0.1:5500',
       'http://localhost:3000',
